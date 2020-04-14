@@ -9,16 +9,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import util.CollectionList;
 import util.ICollectionList;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 public class Utils {
     public static final Sound BLOCK_NOTE_PLING;
 
     static {
-        if (ICollectionList.asList(Sound.values()).map(Enum::name).map((Function<String, String>) String::toLowerCase).contains("BLOCK_NOTE_PLING")) {
+        if (ICollectionList.asList(Sound.values()).map(Enum::name).contains("BLOCK_NOTE_PLING")) {
             BLOCK_NOTE_PLING = Sound.valueOf("BLOCK_NOTE_PLING");
         } else {
             BLOCK_NOTE_PLING = Sound.valueOf("NOTE_PLING");
@@ -46,11 +44,7 @@ public class Utils {
         return item;
     }
 
-    public static ItemStack getItemStack(Material material, String displayName, String... lore) {
-        return getItemStack(material, displayName, Arrays.asList(lore));
-    }
-
     public static ItemStack getItemStack(Material material, String displayName) {
-        return getItemStack(material, displayName, (List<String>) null);
+        return getItemStack(material, displayName, null);
     }
 }

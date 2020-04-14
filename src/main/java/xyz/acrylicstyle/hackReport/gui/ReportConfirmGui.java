@@ -69,6 +69,7 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
                 p.playSound(p.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 0);
                 p.sendMessage(ChatColor.GREEN + "通報: " + ChatColor.RED + target.getName() + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
             });
+            HackReport.getPlayerInfo(target.getName(), target.getUniqueId()).increaseReports();
             player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "通報が完了しました。");
             player.closeInventory();

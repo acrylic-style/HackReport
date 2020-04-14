@@ -1,6 +1,17 @@
 name: HackReport
 main: xyz.acrylicstyle.hackReport.HackReport
 version: 0.0.1
+permissions:
+  hackreport.*:
+    children:
+      hackreport.report: true
+  hackreport.report:
+    default: true
 commands:
   report:
     description: "Report a player."
+    permission: hackreport.report
+  reports:
+    description: "Shows reports list."
+    permission: hackreport.reports
+    aliases: ["reportlist"]
