@@ -34,7 +34,7 @@ public class ReportListGui implements InventoryHolder, Listener {
     private Inventory setItems() {
         int page = pages.getOrDefault(uuid, new AtomicInteger(1)).get();
         Inventory inventory = Bukkit.createInventory(this, 54, ChatColor.GREEN + "通報一覧 - ページ" + page);
-        HackReport.PLAYERS.forEach((uuid, player, index, a) -> {
+        HackReport.PLAYERS.filter(p -> p.getReports() != 0).forEach((uuid, player, index, a) -> {
             if (index >= 44*(page-1) && index <= 44*page) {
                 ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
                 SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
@@ -72,7 +72,7 @@ public class ReportListGui implements InventoryHolder, Listener {
         Player p = (Player) e.getWhoClicked();
         if (e.getSlot() < 45) {
             int page = pages.getOrDefault(uuid, new AtomicInteger(1)).get();
-            HackReport.REPORTS.foreach((player, index) -> {
+            HackReport.PLAYERS.filter(p2 -> p2.getReports() != 0).foreach((player, index) -> {
                 if (index >= 44*(page-1) && index <= 44*page) {
                     if (index-(44*(page-1)) == e.getSlot()) {
                         p.openInventory(HackReport.PLAYER_ACTION_GUI.prepare(p, player.getName(), player.getUniqueId()).getInventory());
