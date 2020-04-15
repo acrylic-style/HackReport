@@ -1,5 +1,7 @@
 package xyz.acrylicstyle.hackReport.gui;
 
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -15,6 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.utils.InventoryUtils;
@@ -65,7 +68,13 @@ public class PlayerActionGui implements InventoryHolder, Listener {
         redMeta.setDisplayName(ChatColor.RED + "キャンセル");
         red.setItemMeta(redMeta);
         inventory.setItem(11, ban);
-        inventory.setItem(13, kick);
+        if (HackReport.luckPerms == null) {
+            inventory.setItem(13, kick);
+        } else {
+            inventory.setItem(12, kick);
+            inventory.setItem(13, revoke);
+            inventory.setItem(14, unrevoke);
+        }
         inventory.setItem(15, red);
         return new InventoryUtils(inventory).fillEmptySlotsWithGlass().getInventory();
     }
@@ -89,7 +98,8 @@ public class PlayerActionGui implements InventoryHolder, Listener {
             player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "プレイヤーをBANしました。");
             player.closeInventory();
-        } else if (e.getSlot() == 13) {
+        }
+        if (e.getSlot() == (HackReport.luckPerms == null ? 13 : 12)) {
             Player player2 = Bukkit.getPlayer(targetUUID);
             if (player2 == null) {
                 player.sendMessage(ChatColor.RED + "プレイヤーは現在オンラインではありません。");
@@ -99,7 +109,30 @@ public class PlayerActionGui implements InventoryHolder, Listener {
             player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "プレイヤーをKickしました。");
             player.closeInventory();
-        } else if (e.getSlot() == 15) {
+        }
+        if (HackReport.luckPerms != null) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (e.getSlot() == 13) {
+                        User user = HackReport.luckPerms.getUserManager().loadUser(targetUUID).join();
+                        user.data().add(Node.builder("-hackreport.report").build());
+                        HackReport.luckPerms.getUserManager().saveUser(user);
+                        player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+                        player.sendMessage(ChatColor.RED + targetName + ChatColor.GREEN + "の通報権限を剥奪しました。");
+                        player.closeInventory();
+                    } else if (e.getSlot() == 14) {
+                        User user = HackReport.luckPerms.getUserManager().loadUser(targetUUID).join();
+                        user.data().remove(Node.builder("-hackreport.report").build());
+                        HackReport.luckPerms.getUserManager().saveUser(user);
+                        player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+                        player.sendMessage(ChatColor.RED + targetName + ChatColor.GREEN + "の通報権限の剥奪を取り消しました。");
+                        player.closeInventory();
+                    }
+                }
+            }.runTaskAsynchronously(HackReport.getInstance());
+        }
+        if (e.getSlot() == 15) {
             e.getWhoClicked().openInventory(HackReport.REPORT_GUI.prepare(e.getWhoClicked().getUniqueId()).getInventory());
         }
     }
