@@ -20,9 +20,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.hackReport.HackReport;
+import xyz.acrylicstyle.hackReport.utils.HackReportPlayer;
 import xyz.acrylicstyle.hackReport.utils.InventoryUtils;
+import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.Utils;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 public class PlayerActionGui implements InventoryHolder, Listener {
@@ -41,7 +44,28 @@ public class PlayerActionGui implements InventoryHolder, Listener {
     @NotNull
     private Inventory getItems() {
         if (uuid == null || targetName == null || targetUUID == null) throw new NullPointerException("You must call #prepare first.");
-        Inventory inventory = Bukkit.createInventory(this, 27, ChatColor.YELLOW + "確認");
+        Inventory inventory = Bukkit.createInventory(this, 27, "");
+        ItemStack info = new ItemStack(Material.PAPER);
+        ItemMeta infoMeta = info.getItemMeta();
+        Validate.notNull(info, "Meta cannot be null");
+        PlayerInfo playerInfo = HackReport.getPlayerInfo(targetName, targetUUID);
+        HackReportPlayer player = new HackReportPlayer(targetUUID);
+        infoMeta.setDisplayName(ChatColor.GREEN + "プレイヤー情報");
+        infoMeta.setLore(Arrays.asList(
+                ChatColor.GREEN + "UUID: " + ChatColor.GOLD + playerInfo.getUniqueId().toString(),
+                "",
+                ChatColor.GOLD + "通報された回数: " + ChatColor.RED + playerInfo.getReports() + ChatColor.GOLD + "回",
+                "",
+                ChatColor.GOLD + "キル数: " + ChatColor.RED + playerInfo.getKills() + ChatColor.GOLD + "回",
+                ChatColor.GOLD + "死んだ回数: " + ChatColor.RED + playerInfo.getDeaths() + ChatColor.GOLD + "回",
+                "",
+                ChatColor.GOLD + "BANされている: " + ChatColor.RED + (Bukkit.getOfflinePlayer(playerInfo.getUniqueId()).isBanned() ? "はい" : "いいえ"),
+                ChatColor.GOLD + "オンライン: " + ChatColor.RED + (player.isOnline() ? "はい" : "いいえ"),
+                ChatColor.GOLD + "体力: " + ChatColor.RED + (Math.round(player.getHealth()*100)/100F),
+                ChatColor.GOLD + "食料レベル: " + ChatColor.RED + player.getFoodLevel(),
+                ChatColor.GOLD + "浮遊している: " + ChatColor.RED + (player.isFlying() ? "はい" : "いいえ")
+        ));
+        info.setItemMeta(infoMeta);
         ItemStack ban = new ItemStack(Material.WOOL, 1, (short) 5);
         ItemMeta banMeta = ban.getItemMeta();
         Validate.notNull(banMeta, "Meta cannot be null");
@@ -67,6 +91,7 @@ public class PlayerActionGui implements InventoryHolder, Listener {
         Validate.notNull(redMeta, "Meta cannot be null");
         redMeta.setDisplayName(ChatColor.RED + "キャンセル");
         red.setItemMeta(redMeta);
+        inventory.setItem(4, info);
         inventory.setItem(11, ban);
         if (HackReport.luckPerms == null) {
             inventory.setItem(13, kick);
@@ -115,18 +140,18 @@ public class PlayerActionGui implements InventoryHolder, Listener {
                 @Override
                 public void run() {
                     if (e.getSlot() == 13) {
-                        User user = HackReport.luckPerms.getUserManager().loadUser(targetUUID).join();
+                        User user = HackReport.luckPerms.getUserManager().loadUser(player.getUniqueId()).join();
                         user.data().add(Node.builder("-hackreport.report").build());
                         HackReport.luckPerms.getUserManager().saveUser(user);
                         player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
-                        player.sendMessage(ChatColor.RED + targetName + ChatColor.GREEN + "の通報権限を剥奪しました。");
+                        player.sendMessage(ChatColor.RED + player.getName() + ChatColor.GREEN + "の通報権限を剥奪しました。");
                         player.closeInventory();
                     } else if (e.getSlot() == 14) {
-                        User user = HackReport.luckPerms.getUserManager().loadUser(targetUUID).join();
+                        User user = HackReport.luckPerms.getUserManager().loadUser(player.getUniqueId()).join();
                         user.data().remove(Node.builder("-hackreport.report").build());
                         HackReport.luckPerms.getUserManager().saveUser(user);
                         player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
-                        player.sendMessage(ChatColor.RED + targetName + ChatColor.GREEN + "の通報権限の剥奪を取り消しました。");
+                        player.sendMessage(ChatColor.RED + player.getName() + ChatColor.GREEN + "の通報権限の剥奪を取り消しました。");
                         player.closeInventory();
                     }
                 }

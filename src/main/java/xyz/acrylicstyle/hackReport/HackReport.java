@@ -11,6 +11,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import util.Collection;
 import util.CollectionList;
+import xyz.acrylicstyle.hackReport.commands.HackReportCommand;
+import xyz.acrylicstyle.hackReport.commands.PlayerCommand;
 import xyz.acrylicstyle.hackReport.commands.ReportCommand;
 import xyz.acrylicstyle.hackReport.commands.ReportsCommand;
 import xyz.acrylicstyle.hackReport.gui.*;
@@ -50,6 +52,8 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        TomeitoLib.registerCommand("hackreport", new HackReportCommand());
+        TomeitoLib.registerCommand("player", new PlayerCommand());
         TomeitoLib.registerCommand("report", new ReportCommand());
         TomeitoLib.registerCommand("reports", new ReportsCommand());
         Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
