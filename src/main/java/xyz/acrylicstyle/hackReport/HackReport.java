@@ -18,8 +18,8 @@ import xyz.acrylicstyle.hackReport.commands.ReportsCommand;
 import xyz.acrylicstyle.hackReport.gui.*;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
-import xyz.acrylicstyle.tomeito_core.TomeitoLib;
-import xyz.acrylicstyle.tomeito_core.utils.Log;
+import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.UUID;
 
@@ -52,10 +52,10 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        TomeitoLib.registerCommand("hackreport", new HackReportCommand());
-        TomeitoLib.registerCommand("player", new PlayerCommand());
-        TomeitoLib.registerCommand("report", new ReportCommand());
-        TomeitoLib.registerCommand("reports", new ReportsCommand());
+        TomeitoAPI.registerCommand("hackreport", new HackReportCommand());
+        TomeitoAPI.registerCommand("player", new PlayerCommand());
+        TomeitoAPI.registerCommand("report", new ReportCommand());
+        TomeitoAPI.registerCommand("reports", new ReportsCommand());
         Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
         Bukkit.getPluginManager().registerEvents(REPORT_CONFIRM_GUI, this);
         Bukkit.getPluginManager().registerEvents(REPORT_LIST_GUI, this);

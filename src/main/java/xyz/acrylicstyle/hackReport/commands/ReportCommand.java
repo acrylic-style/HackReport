@@ -10,8 +10,8 @@ import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.hackReport.utils.Utils;
-import xyz.acrylicstyle.tomeito_core.command.Command;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.Command;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 import java.util.UUID;
 

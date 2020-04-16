@@ -5,8 +5,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_core.command.Command;
-import xyz.acrylicstyle.tomeito_core.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.Command;
+import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
 
 import java.util.UUID;
 
