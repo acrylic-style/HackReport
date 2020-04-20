@@ -66,12 +66,13 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>Util</artifactId>
-            <version>0.10.0</version>
+            <version>0.10.2</version>
         </dependency>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>tomeito_plugin</artifactId>
-            <version>0.3.1</version>
+            <version>0.3.7</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.luckperms</groupId>
