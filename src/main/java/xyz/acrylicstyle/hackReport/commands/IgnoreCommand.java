@@ -11,13 +11,10 @@ import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class IgnoreCommand extends PlayerCommandExecutor {
-    @SuppressWarnings("unchecked")
     @Override
     public void onCommand(Player player, String[] args) {
         new BukkitRunnable() {
@@ -76,10 +73,6 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                 }
             }
         }.runTaskAsynchronously(HackReport.getInstance());
-        Map<String, Object> map = HackReport.config.getConfigSectionValue("ignore", true);
-        Collection<String, Object> rawCollection = map == null ? new Collection<>() : ICollection.asCollection(map);
-        Collection<UUID, List<String>> collection = rawCollection.map((s, o) -> UUID.fromString(s), (s, o) -> (List<String>) o);
-        List<String> list = collection.getOrDefault(player.getUniqueId(), new ArrayList<>());
     }
 
     private static Collection<UUID, String> loadIgnoreListPlayer(UUID uuid) {
