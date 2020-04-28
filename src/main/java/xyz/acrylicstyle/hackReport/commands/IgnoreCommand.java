@@ -92,11 +92,11 @@ public class IgnoreCommand extends PlayerCommandExecutor {
             return null;
         }
         if (player.getUniqueId().equals(uuid)) {
-            player.sendMessage(ChatColor.RED + "自分自身をIgnoreすることはできません。");
+            player.sendMessage(ChatColor.RED + "自分自身に対してそのコマンドを実行することはできません。");
             return null;
         }
         if (Bukkit.getOfflinePlayer(uuid).isOp()) {
-            player.sendMessage(ChatColor.RED + "OPをIgnoreすることはできません。");
+            player.sendMessage(ChatColor.RED + "OPを対象にすることはできません。");
             return null;
         }
         return uuid;

@@ -2,10 +2,8 @@ package xyz.acrylicstyle.hackReport.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import xyz.acrylicstyle.tomeito_api.command.Command;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
-@Command("hackreport")
 public class HackReportCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
@@ -16,6 +14,7 @@ public class HackReportCommand extends PlayerCommandExecutor {
         if (player.isOp()) {
             player.sendMessage(ChatColor.YELLOW + " - /reports " + ChatColor.GRAY + "- " + ChatColor.AQUA + "通報一覧を表示します。");
             player.sendMessage(ChatColor.YELLOW + " - /player <プレイヤー> " + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーの情報を確認します。");
+            player.sendMessage(ChatColor.YELLOW + " - /mute <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーをミュート/ミュート解除します。");
         }
     }
 }

@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import util.Collection;
 import util.CollectionList;
+import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.commands.*;
 import xyz.acrylicstyle.hackReport.gui.*;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
@@ -62,6 +63,7 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("report", new ReportCommand());
         TomeitoAPI.registerCommand("reports", new ReportsCommand());
         TomeitoAPI.registerCommand("ignore", new IgnoreCommand());
+        TomeitoAPI.registerCommand("mute", new MuteCommand());
         Log.info("Registering events");
         Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
         Bukkit.getPluginManager().registerEvents(REPORT_CONFIRM_GUI, this);
@@ -84,13 +86,17 @@ public class HackReport extends JavaPlugin implements Listener {
         config.saveWithoutException();
     }
 
+    public static CollectionList<UUID> getMutedPlayers() {
+        return ICollectionList.asList(config.getStringList("muted")).map(UUID::fromString);
+    }
+
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
         if (e.getMessage().startsWith("/tell ")) {
             String p = e.getMessage().split(" ")[1];
             Player player = Bukkit.getPlayer(p);
             if (player == null) return;
-            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())) {
+            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId()) || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
                 e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
                 e.setCancelled(true);
             }
@@ -108,6 +114,10 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
+        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+            e.getRecipients().clear();
+            return;
+        }
         e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
     }
 }

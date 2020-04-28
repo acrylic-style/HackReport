@@ -2,10 +2,8 @@ package xyz.acrylicstyle.hackReport.commands;
 
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.Command;
 import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
 
-@Command("reports")
 public class ReportsCommand extends PlayerOpCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {

@@ -5,12 +5,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.Command;
 import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
 
 import java.util.UUID;
 
-@Command("player")
 public class PlayerCommand extends PlayerOpCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {

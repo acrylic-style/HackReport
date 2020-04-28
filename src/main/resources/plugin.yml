@@ -17,3 +17,5 @@ commands:
     aliases: "hr"
   ignore:
     description: "Ignore players' chat"
+  mute:
+    description: "Mute a player."
