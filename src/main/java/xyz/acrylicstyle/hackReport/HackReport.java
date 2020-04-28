@@ -77,6 +77,11 @@ public class HackReport extends JavaPlugin implements Listener {
         Log.info("Enabled HackReport");
     }
 
+    @Override
+    public void onDisable() {
+        config.saveWithoutException();
+    }
+
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
         Player killer = e.getEntity().getKiller();
