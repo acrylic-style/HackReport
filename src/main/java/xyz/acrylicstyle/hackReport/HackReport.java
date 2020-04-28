@@ -2,11 +2,13 @@ package xyz.acrylicstyle.hackReport;
 
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -80,6 +82,19 @@ public class HackReport extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         config.saveWithoutException();
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        if (e.getMessage().startsWith("/tell ")) {
+            String p = e.getMessage().split(" ")[1];
+            Player player = Bukkit.getPlayer(p);
+            if (player == null) return;
+            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())) {
+                e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
+                e.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
