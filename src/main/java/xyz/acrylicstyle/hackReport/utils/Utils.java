@@ -16,10 +16,12 @@ public class Utils {
     public static final Sound BLOCK_NOTE_PLING;
 
     static {
-        if (ICollectionList.asList(Sound.values()).map(Enum::name).contains("BLOCK_NOTE_PLING")) {
-            BLOCK_NOTE_PLING = Sound.valueOf("BLOCK_NOTE_PLING");
+        if (ICollectionList.asList(Sound.values()).map(Enum::name).contains("BLOCK_NOTE_BLOCK_PLING")) {
+            BLOCK_NOTE_PLING = Sound.valueOf("BLOCK_NOTE_BLOCK_PLING"); // 1.13+?
+        } else if (ICollectionList.asList(Sound.values()).map(Enum::name).contains("BLOCK_NOTE_PLING")) {
+            BLOCK_NOTE_PLING = Sound.valueOf("BLOCK_NOTE_PLING"); // 1.9+ or 1.12.2+
         } else {
-            BLOCK_NOTE_PLING = Sound.valueOf("NOTE_PLING");
+            BLOCK_NOTE_PLING = Sound.valueOf("NOTE_PLING"); // 1.8
         }
     }
 
