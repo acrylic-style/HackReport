@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import util.CollectionList;
 import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.hackReport.utils.Utils;
 import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 
 import java.util.UUID;
 
@@ -25,14 +25,14 @@ public class MuteCommand extends PlayerOpCommandExecutor {
             list.remove(uuid);
             HackReport.config.setThenSaveWithoutException("muted", list.map(UUID::toString).toList());
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
-                p.playSound(p.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 1);
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "のミュートを解除しました。");
             });
         } else {
             list.add(uuid);
             HackReport.config.setThenSaveWithoutException("muted", list.map(UUID::toString).toList());
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
-                p.playSound(p.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 1);
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "をミュートしました。");
             });
         }

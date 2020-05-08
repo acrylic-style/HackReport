@@ -83,7 +83,7 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        config.saveWithoutException();
+        config.save();
     }
 
     public static CollectionList<UUID> getMutedPlayers() {

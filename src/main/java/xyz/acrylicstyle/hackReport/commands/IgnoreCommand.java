@@ -65,14 +65,13 @@ public class IgnoreCommand extends PlayerCommandExecutor {
     }
 
     public static StringCollection<String> loadIgnoreListPlayer(UUID uuid) {
-        Map<String, Object> map2 = ConfigProvider.initWithoutException("./plugins/HackReport/players/" + uuid.toString() + ".yml").getConfigSectionValue("ignore", true);
+        Map<String, Object> map2 = ConfigProvider.getConfig("./plugins/HackReport/players/" + uuid.toString() + ".yml").getConfigSectionValue("ignore", true);
         if (map2 == null) return new StringCollection<>();
         return new StringCollection<>(ICollection.asCollection(map2).mapValues((s, o) -> (String) o));
     }
 
     public static void saveIgnoreListPlayer(UUID uuid, StringCollection<String> collection) {
-        ConfigProvider config = ConfigProvider.initWithoutException("./plugins/HackReport/players/" + uuid.toString() + ".yml");
-        config.setThenSaveWithoutException("ignore", new HashMap<>(collection));
+        ConfigProvider.getConfig("./plugins/HackReport/players/" + uuid.toString() + ".yml").setThenSave("ignore", new HashMap<>(collection));
     }
 
     public static boolean isPlayerIgnored(UUID uuid, UUID target) {

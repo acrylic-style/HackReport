@@ -24,6 +24,8 @@ import xyz.acrylicstyle.hackReport.utils.HackReportPlayer;
 import xyz.acrylicstyle.hackReport.utils.InventoryUtils;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.Utils;
+import xyz.acrylicstyle.tomeito_api.sounds.Sound;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -120,7 +122,8 @@ public class PlayerActionGui implements InventoryHolder, Listener {
             Player player2 = Bukkit.getPlayer(targetUUID);
             if (player2 != null) player2.kickPlayer(null);
             Utils.getOnlinePlayers().filter(Player::isOp).forEach(p -> p.sendMessage(ChatColor.GREEN + "[HackReport]" + ChatColor.GOLD + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + targetName + ChatColor.GREEN + "をBANしました。"));
-            player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+            Log.info(player.getName() + " banned " + (player2 == null ? targetUUID : player2.getName()));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "プレイヤーをBANしました。");
             player.closeInventory();
         }
@@ -131,7 +134,8 @@ public class PlayerActionGui implements InventoryHolder, Listener {
                 return;
             }
             player2.kickPlayer(null);
-            player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+            Log.info(player.getName() + " kicked " + player2.getName());
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "プレイヤーをKickしました。");
             player.closeInventory();
         }
@@ -143,14 +147,14 @@ public class PlayerActionGui implements InventoryHolder, Listener {
                         User user = HackReport.luckPerms.getUserManager().loadUser(player.getUniqueId()).join();
                         user.data().add(Node.builder("-hackreport.report").build());
                         HackReport.luckPerms.getUserManager().saveUser(user);
-                        player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
                         player.sendMessage(ChatColor.RED + player.getName() + ChatColor.GREEN + "の通報権限を剥奪しました。");
                         player.closeInventory();
                     } else if (e.getSlot() == 14) {
                         User user = HackReport.luckPerms.getUserManager().loadUser(player.getUniqueId()).join();
                         user.data().remove(Node.builder("-hackreport.report").build());
                         HackReport.luckPerms.getUserManager().saveUser(user);
-                        player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
                         player.sendMessage(ChatColor.RED + player.getName() + ChatColor.GREEN + "の通報権限の剥奪を取り消しました。");
                         player.closeInventory();
                     }

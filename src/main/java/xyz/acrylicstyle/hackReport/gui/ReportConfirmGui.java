@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.utils.InventoryUtils;
 import xyz.acrylicstyle.hackReport.utils.Utils;
+import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 
 import java.util.Collections;
 
@@ -66,11 +67,11 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
         Player player = (Player) e.getWhoClicked();
         if (e.getSlot() == 11) {
             Utils.getOnlinePlayers().filter(ServerOperator::isOp).forEach(p -> {
-                p.playSound(p.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 0);
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 0);
                 p.sendMessage(ChatColor.GREEN + "通報: " + ChatColor.RED + target.getName() + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
             });
             HackReport.getPlayerInfo(target.getName(), target.getUniqueId()).increaseReports();
-            player.playSound(player.getLocation(), Utils.BLOCK_NOTE_PLING, 100, 2);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "通報が完了しました。");
             player.closeInventory();
         } else if (e.getSlot() == 15) {
