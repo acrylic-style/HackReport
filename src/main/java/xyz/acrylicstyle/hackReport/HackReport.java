@@ -15,6 +15,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import util.Collection;
 import util.CollectionList;
 import util.ICollectionList;
+import xyz.acrylicstyle.hackReport.api.event.GlobalChatEvent;
+import xyz.acrylicstyle.hackReport.api.event.TeamChatEvent;
 import xyz.acrylicstyle.hackReport.commands.*;
 import xyz.acrylicstyle.hackReport.gui.*;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
@@ -100,6 +102,11 @@ public class HackReport extends JavaPlugin implements Listener {
                 e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
                 e.setCancelled(true);
             }
+        } else if (e.getMessage().startsWith("/me")) {
+            if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+                e.getPlayer().sendMessage(ChatColor.RED + "このコマンドを使用することはできません。");
+                e.setCancelled(true);
+            }
         }
     }
 
@@ -114,6 +121,24 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
+        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+            e.getRecipients().clear();
+            return;
+        }
+        e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
+    }
+
+    @EventHandler
+    public void onTeamChat(TeamChatEvent e) {
+        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+            e.getRecipients().clear();
+            return;
+        }
+        e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
+    }
+
+    @EventHandler
+    public void onGlobalChat(GlobalChatEvent e) {
         if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
             e.getRecipients().clear();
             return;
