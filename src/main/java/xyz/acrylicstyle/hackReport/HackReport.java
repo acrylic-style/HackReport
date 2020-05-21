@@ -28,6 +28,7 @@ import xyz.acrylicstyle.tomeito_api.utils.Log;
 import java.util.UUID;
 
 public class HackReport extends JavaPlugin implements Listener {
+    public static final CollectionList<UUID> opChat = new CollectionList<>();
     public static final ReportGui REPORT_GUI = new ReportGui();
     public static final ReportConfirmGui REPORT_CONFIRM_GUI = new ReportConfirmGui();
     public static final Collection<UUID, PlayerInfo> PLAYERS = new Collection<>();
@@ -58,7 +59,7 @@ public class HackReport extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         Log.info("Loading configuration");
-        config = ConfigProvider.initWithoutException("./plugins/HackReport/config.yml");
+        config = new ConfigProvider("./plugins/HackReport/config.yml");
         Log.info("Registering commands");
         TomeitoAPI.registerCommand("hackreport", new HackReportCommand());
         TomeitoAPI.registerCommand("player", new PlayerCommand());
@@ -66,6 +67,7 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("reports", new ReportsCommand());
         TomeitoAPI.registerCommand("ignore", new IgnoreCommand());
         TomeitoAPI.registerCommand("mute", new MuteCommand());
+        TomeitoAPI.registerCommand("opchat", new OpChat());
         Log.info("Registering events");
         Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
         Bukkit.getPluginManager().registerEvents(REPORT_CONFIRM_GUI, this);
@@ -121,6 +123,11 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
+        if (e.getPlayer().isOp() && opChat.contains(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+            OpChat.Do(e.getPlayer().getName(), e.getMessage());
+            return;
+        }
         if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
             e.getRecipients().clear();
             return;

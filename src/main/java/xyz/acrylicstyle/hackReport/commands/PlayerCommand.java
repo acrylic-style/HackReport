@@ -1,6 +1,5 @@
 package xyz.acrylicstyle.hackReport.commands;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.api.MojangAPI;
@@ -17,22 +16,10 @@ public class PlayerCommand extends PlayerOpCommandExecutor {
             return;
         }
         String p = args[0];
-        if (player.getName().equalsIgnoreCase(p)) {
-            player.sendMessage(ChatColor.RED + "自分自身を操作することはできません。");
-            return;
-        }
         UUID uuid = MojangAPI.getUniqueId(p);
         if (uuid == null) {
             player.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
             player.sendMessage(ChatColor.RED + "/player <player>");
-            return;
-        }
-        if (player.getUniqueId().equals(uuid)) {
-            player.sendMessage(ChatColor.RED + "自分自身を操作することはできません。");
-            return;
-        }
-        if (Bukkit.getOfflinePlayer(uuid).isOp()) {
-            player.sendMessage(ChatColor.RED + "OPを操作することはできません。");
             return;
         }
         player.openInventory(HackReport.PLAYER_ACTION_GUI.prepare(player, args[0], uuid).getInventory());

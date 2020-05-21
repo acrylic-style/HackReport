@@ -20,7 +20,7 @@ public class InventoryUtils {
     }
 
     public InventoryUtils cloneInventory() {
-        Inventory newInventory = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), inventory.getTitle());
+        Inventory newInventory = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), " ");
         for (int i = 0; i < inventory.getSize(); i++) newInventory.setItem(i, inventory.getItem(i));
         return new InventoryUtils(newInventory);
     }

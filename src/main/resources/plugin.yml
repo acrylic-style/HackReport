@@ -21,3 +21,5 @@ commands:
     description: "Ignore players' chat"
   mute:
     description: "Mute a player."
+  opchat:
+    aliases: "oc"
