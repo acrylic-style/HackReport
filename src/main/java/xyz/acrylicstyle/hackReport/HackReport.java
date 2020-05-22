@@ -29,6 +29,7 @@ import java.util.UUID;
 
 public class HackReport extends JavaPlugin implements Listener {
     public static final CollectionList<UUID> opChat = new CollectionList<>();
+    public static final CollectionList<UUID> commandLog = new CollectionList<>();
     public static final ReportGui REPORT_GUI = new ReportGui();
     public static final ReportConfirmGui REPORT_CONFIRM_GUI = new ReportConfirmGui();
     public static final Collection<UUID, PlayerInfo> PLAYERS = new Collection<>();
@@ -68,6 +69,7 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("ignore", new IgnoreCommand());
         TomeitoAPI.registerCommand("mute", new MuteCommand());
         TomeitoAPI.registerCommand("opchat", new OpChat());
+        TomeitoAPI.registerCommand("commandlog", new CommandLogCommand());
         Log.info("Registering events");
         Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
         Bukkit.getPluginManager().registerEvents(REPORT_CONFIRM_GUI, this);
@@ -96,6 +98,9 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(player -> {
+            if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
+        });
         if (e.getMessage().startsWith("/tell ")) {
             String p = e.getMessage().split(" ")[1];
             Player player = Bukkit.getPlayer(p);

@@ -14,7 +14,9 @@ public class HackReportCommand extends PlayerCommandExecutor {
         if (player.isOp()) {
             player.sendMessage(ChatColor.YELLOW + " - /reports " + ChatColor.GRAY + "- " + ChatColor.AQUA + "通報一覧を表示します。");
             player.sendMessage(ChatColor.YELLOW + " - /player <プレイヤー> " + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーの情報を確認します。");
-            player.sendMessage(ChatColor.YELLOW + " - /mute <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーをミュート/ミュート解除します。");
+            player.sendMessage(ChatColor.YELLOW + " - /mute <プレイヤー> " + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーをミュート/ミュート解除します。");
+            player.sendMessage(ChatColor.YELLOW + " - /oc [メッセージ] " + ChatColor.GRAY + "- " + ChatColor.AQUA + "OPChatでチャットする/OPChatモードに切り替えます。");
+            player.sendMessage(ChatColor.YELLOW + " - /commandlog " + ChatColor.GRAY + "- " + ChatColor.AQUA + "コマンドログを表示するようにします。");
         }
     }
 }
