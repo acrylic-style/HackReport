@@ -101,7 +101,7 @@ public class HackReport extends JavaPlugin implements Listener {
         Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(player -> {
             if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
         });
-        if (e.getMessage().startsWith("/tell ")) {
+        if (e.getMessage().startsWith("/tell ") || e.getMessage().startsWith("/w ") || e.getMessage().startsWith("/msg ")) {
             String p = e.getMessage().split(" ")[1];
             Player player = Bukkit.getPlayer(p);
             if (player == null) return;
