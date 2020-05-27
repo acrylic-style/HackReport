@@ -8,7 +8,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,6 +27,8 @@ import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class HackReport extends JavaPlugin implements Listener {
@@ -85,6 +89,45 @@ public class HackReport extends JavaPlugin implements Listener {
             }
         }.runTaskLater(this, 1);
         Log.info("Enabled HackReport");
+    }
+
+    @SuppressWarnings("unchecked")
+    @EventHandler
+    public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+        if (Bukkit.getOfflinePlayer(e.getUniqueId()).isOp()) return;
+        String ip = e.getAddress().getHostAddress();
+        Object o = config.get("ips." + ip);
+        if (o == null) return;
+        Map<String, Object> map = ConfigProvider.getConfigSectionValue(o, true);
+        if (map == null) return;
+        boolean kickPlayer = (boolean) map.get("kickPlayer");
+        CollectionList<String> kickMessage = ICollectionList.asList((List<String>) map.get("kickMessage")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
+        if (kickPlayer) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, kickMessage.join("\n"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        String ip = e.getPlayer().getAddress().getAddress().getHostAddress();
+        Object o = config.get("ips." + ip);
+        if (o == null) return;
+        Map<String, Object> map = ConfigProvider.getConfigSectionValue(o, true);
+        if (map == null) return;
+        boolean kickPlayer = (boolean) map.get("kickPlayer");
+        CollectionList<String> kickMessage = ICollectionList.asList((List<String>) map.get("kickMessage")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
+        if (e.getPlayer().isOp() && kickPlayer) {
+            e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+            e.getPlayer().sendMessage(ChatColor.RED + "このIPアドレスからの接続は制限されています。");
+            e.getPlayer().sendMessage(ChatColor.GOLD + "理由:");
+            kickMessage.forEach(e.getPlayer()::sendMessage);
+            e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+        }
+        CollectionList<String> messages = ICollectionList.asList((List<String>) map.get("messages")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
+        e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+        e.getPlayer().sendMessage(ChatColor.RED + "このIPアドレスからの接続は推奨されていません。");
+        e.getPlayer().sendMessage(ChatColor.GOLD + "理由:");
+        messages.forEach(e.getPlayer()::sendMessage);
+        e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
     }
 
     @Override

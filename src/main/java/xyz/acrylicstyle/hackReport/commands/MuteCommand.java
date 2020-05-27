@@ -23,14 +23,14 @@ public class MuteCommand extends PlayerOpCommandExecutor {
         if (uuid == null) return;
         if (list.contains(uuid)) {
             list.remove(uuid);
-            HackReport.config.setThenSaveWithoutException("muted", list.map(UUID::toString).toList());
+            HackReport.config.setThenSave("muted", list.map(UUID::toString).toList());
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "のミュートを解除しました。");
             });
         } else {
             list.add(uuid);
-            HackReport.config.setThenSaveWithoutException("muted", list.map(UUID::toString).toList());
+            HackReport.config.setThenSave("muted", list.map(UUID::toString).toList());
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "をミュートしました。");
