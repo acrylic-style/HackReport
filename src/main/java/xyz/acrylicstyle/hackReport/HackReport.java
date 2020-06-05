@@ -17,10 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import util.Collection;
 import util.CollectionList;
 import util.ICollectionList;
-import xyz.acrylicstyle.hackReport.api.event.GlobalChatEvent;
-import xyz.acrylicstyle.hackReport.api.event.TeamChatEvent;
 import xyz.acrylicstyle.hackReport.commands.*;
-import xyz.acrylicstyle.hackReport.gui.*;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
@@ -34,14 +31,10 @@ import java.util.UUID;
 public class HackReport extends JavaPlugin implements Listener {
     public static final CollectionList<UUID> opChat = new CollectionList<>();
     public static final CollectionList<UUID> commandLog = new CollectionList<>();
-    public static final ReportGui REPORT_GUI = new ReportGui();
-    public static final ReportConfirmGui REPORT_CONFIRM_GUI = new ReportConfirmGui();
     public static final Collection<UUID, PlayerInfo> PLAYERS = new Collection<>();
     public static final CollectionList<ReportDetails> REPORTS = new CollectionList<>();
-    public static final ReportListGui REPORT_LIST_GUI = new ReportListGui();
-    public static final ReportList2Gui REPORT_LIST_2_GUI = new ReportList2Gui();
-    public static final PlayerActionGui PLAYER_ACTION_GUI = new PlayerActionGui();
     public static ConfigProvider config = null;
+    public static boolean muteAll = false;
 
     public static LuckPerms luckPerms = null;
 
@@ -72,14 +65,10 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("reports", new ReportsCommand());
         TomeitoAPI.registerCommand("ignore", new IgnoreCommand());
         TomeitoAPI.registerCommand("mute", new MuteCommand());
-        TomeitoAPI.registerCommand("opchat", new OpChat());
+        TomeitoAPI.registerCommand("opchat", new OpChatCommand());
         TomeitoAPI.registerCommand("commandlog", new CommandLogCommand());
+        TomeitoAPI.registerCommand("muteall", new MuteAllCommand());
         Log.info("Registering events");
-        Bukkit.getPluginManager().registerEvents(REPORT_GUI, this);
-        Bukkit.getPluginManager().registerEvents(REPORT_CONFIRM_GUI, this);
-        Bukkit.getPluginManager().registerEvents(REPORT_LIST_GUI, this);
-        Bukkit.getPluginManager().registerEvents(REPORT_LIST_2_GUI, this);
-        Bukkit.getPluginManager().registerEvents(PLAYER_ACTION_GUI, this);
         Bukkit.getPluginManager().registerEvents(this, this);
         new BukkitRunnable() {
             @Override
@@ -128,6 +117,11 @@ public class HackReport extends JavaPlugin implements Listener {
         e.getPlayer().sendMessage(ChatColor.GOLD + "理由:");
         messages.forEach(e.getPlayer()::sendMessage);
         e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+        if (muteAll) {
+            e.getPlayer().sendMessage("");
+            e.getPlayer().sendMessage(ChatColor.YELLOW + "注意: 現在サーバー管理者によってサーバー全体のチャットが制限されています。");
+            e.getPlayer().sendMessage("");
+        }
     }
 
     @Override
@@ -144,6 +138,7 @@ public class HackReport extends JavaPlugin implements Listener {
         Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(player -> {
             if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
         });
+        if (e.getPlayer().isOp()) return;
         if (e.getMessage().startsWith("/tell ") || e.getMessage().startsWith("/w ") || e.getMessage().startsWith("/msg ")) {
             String p = e.getMessage().split(" ")[1];
             Player player = Bukkit.getPlayer(p);
@@ -153,7 +148,7 @@ public class HackReport extends JavaPlugin implements Listener {
                 e.setCancelled(true);
             }
         } else if (e.getMessage().startsWith("/me")) {
-            if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+            if (HackReport.muteAll || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
                 e.getPlayer().sendMessage(ChatColor.RED + "このコマンドを使用することはできません。");
                 e.setCancelled(true);
             }
@@ -173,28 +168,11 @@ public class HackReport extends JavaPlugin implements Listener {
     public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
         if (e.getPlayer().isOp() && opChat.contains(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
-            OpChat.Do(e.getPlayer().getName(), e.getMessage());
+            OpChatCommand.Do(e.getPlayer().getName(), e.getMessage());
             return;
         }
-        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
-            e.getRecipients().clear();
-            return;
-        }
-        e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
-    }
-
-    @EventHandler
-    public void onTeamChat(TeamChatEvent e) {
-        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
-            e.getRecipients().clear();
-            return;
-        }
-        e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
-    }
-
-    @EventHandler
-    public void onGlobalChat(GlobalChatEvent e) {
-        if (getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+        if (e.getPlayer().isOp()) return;
+        if (HackReport.muteAll || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
             e.getRecipients().clear();
             return;
         }

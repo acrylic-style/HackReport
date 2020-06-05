@@ -26,6 +26,11 @@ public class ReportGui implements InventoryHolder, Listener {
     private volatile UUID uuid = null;
     private final Collection<UUID, AtomicInteger> pages = new Collection<>();
 
+    public ReportGui register() {
+        Bukkit.getPluginManager().registerEvents(this, HackReport.getInstance());
+        return this;
+    }
+
     public ReportGui prepare(UUID uuid) {
         this.uuid = uuid;
         return this;
@@ -67,7 +72,7 @@ public class ReportGui implements InventoryHolder, Listener {
             Utils.getOnlinePlayers(uuid).foreach((player, index) -> {
                 if (index >= 44*(page-1) && index <= 44*page) {
                     if (index-(44*(page-1)) == e.getSlot()) {
-                        p.openInventory(HackReport.REPORT_CONFIRM_GUI.prepare(p, player).getInventory());
+                        p.openInventory(new ReportConfirmGui().register().prepare(p, player).getInventory());
                     }
                 }
             });

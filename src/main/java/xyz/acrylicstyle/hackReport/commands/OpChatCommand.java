@@ -5,9 +5,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
-public class OpChat extends PlayerOpCommandExecutor {
+public class OpChatCommand extends PlayerCommandExecutor {
     public static final String PREFIX = ChatColor.YELLOW + "OPChat " + ChatColor.AQUA + ">> " + ChatColor.YELLOW;
 
     @Override
@@ -29,7 +29,7 @@ public class OpChat extends PlayerOpCommandExecutor {
         Bukkit.getOnlinePlayers()
                 .stream()
                 .filter(Player::isOp)
-                .forEach(player -> player.sendMessage(OpChat.PREFIX
+                .forEach(player -> player.sendMessage(OpChatCommand.PREFIX
                         + ChatColor.GOLD + name
                         + ChatColor.WHITE + ": "
                         + ChatColor.YELLOW + ChatColor.translateAlternateColorCodes('&', message)));

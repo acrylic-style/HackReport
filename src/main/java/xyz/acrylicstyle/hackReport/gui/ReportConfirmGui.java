@@ -27,6 +27,11 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
     private volatile Player uuid = null;
     private volatile Player target = null;
 
+    public ReportConfirmGui register() {
+        Bukkit.getPluginManager().registerEvents(this, HackReport.getInstance());
+        return this;
+    }
+
     @NotNull
     public ReportConfirmGui prepare(@NotNull Player reporter, @NotNull Player target) {
         this.uuid = reporter;
@@ -75,7 +80,7 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
             player.sendMessage(ChatColor.GREEN + "通報が完了しました。");
             player.closeInventory();
         } else if (e.getSlot() == 15) {
-            e.getWhoClicked().openInventory(HackReport.REPORT_GUI.prepare(e.getWhoClicked().getUniqueId()).getInventory());
+            e.getWhoClicked().openInventory(new ReportGui().register().prepare(e.getWhoClicked().getUniqueId()).getInventory());
         }
     }
 

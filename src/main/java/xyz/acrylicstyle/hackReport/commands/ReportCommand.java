@@ -9,6 +9,7 @@ import util.CollectionList;
 import util.ICollectionList;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
+import xyz.acrylicstyle.hackReport.gui.ReportGui;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.hackReport.utils.Utils;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
@@ -19,12 +20,12 @@ import java.util.UUID;
 public class ReportCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
-        if (player.isPermissionSet("-hackreport.report")) {
+        if (!player.hasPermission("hackreport.report")) {
             player.sendMessage(ChatColor.RED + "コマンドを実行する権限がありません。");
             return;
         }
         if (args.length == 0) {
-            player.openInventory(HackReport.REPORT_GUI.prepare(player.getUniqueId()).getInventory());
+            player.openInventory(new ReportGui().register().prepare(player.getUniqueId()).getInventory());
         } else {
             new BukkitRunnable() {
                 @Override

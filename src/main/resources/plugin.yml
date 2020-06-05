@@ -9,19 +9,31 @@ commands:
   report:
     description: "Report a player."
   reports:
-    description: "Shows reports list." # actually requires OP
+    description: "Shows reports list."
     aliases: ["reportlist"]
+    permission: hackreport.reports
   player:
-    description: "Opens player action GUI." # actually requires OP
+    description: "Opens player action GUI."
     aliases: ["playeraction"]
+    permission: hackreport.player
   hackreport:
     description: "HackReport root command."
     aliases: "hr"
   ignore:
-    description: "Ignore players' chat"
+    description: "Ignore specific player's chat"
   mute:
     description: "Mute a player."
+    permission: hackreport.mute
   opchat:
     aliases: "oc"
+    permission: hackreport.opchat
   commandlog:
     aliases: ["clog", "cl"]
+    permission: hackreport.commandlog
+  muteall:
+    description: "Mutes all server chats. (excludes /tell)"
+    permission: hackreport.muteall
+permissions:
+  hackreport.report:
+    description: "allows /report"
+    default: true

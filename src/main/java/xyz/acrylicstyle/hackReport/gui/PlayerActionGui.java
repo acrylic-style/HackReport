@@ -35,6 +35,11 @@ public class PlayerActionGui implements InventoryHolder, Listener {
     private volatile UUID targetUUID = null;
     private volatile String targetName = null;
 
+    public PlayerActionGui register() {
+        Bukkit.getPluginManager().registerEvents(this, HackReport.getInstance());
+        return this;
+    }
+
     @NotNull
     public PlayerActionGui prepare(@NotNull Player reporter, @NotNull String targetName, @NotNull UUID targetUUID) {
         this.uuid = reporter;
@@ -162,7 +167,7 @@ public class PlayerActionGui implements InventoryHolder, Listener {
             }.runTaskAsynchronously(HackReport.getInstance());
         }
         if (e.getSlot() == 15) {
-            e.getWhoClicked().openInventory(HackReport.REPORT_GUI.prepare(e.getWhoClicked().getUniqueId()).getInventory());
+            e.getWhoClicked().openInventory(new ReportGui().register().prepare(e.getWhoClicked().getUniqueId()).getInventory());
         }
     }
 

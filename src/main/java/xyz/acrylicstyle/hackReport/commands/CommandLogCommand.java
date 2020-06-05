@@ -3,9 +3,9 @@ package xyz.acrylicstyle.hackReport.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
-public class CommandLogCommand extends PlayerOpCommandExecutor {
+public class CommandLogCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         if (HackReport.commandLog.contains(player.getUniqueId())) {

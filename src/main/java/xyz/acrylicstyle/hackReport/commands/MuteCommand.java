@@ -6,12 +6,12 @@ import org.bukkit.entity.Player;
 import util.CollectionList;
 import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 
 import java.util.UUID;
 
-public class MuteCommand extends PlayerOpCommandExecutor {
+public class MuteCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         if (args.length == 0) {

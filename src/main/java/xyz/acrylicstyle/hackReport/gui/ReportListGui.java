@@ -26,6 +26,11 @@ public class ReportListGui implements InventoryHolder, Listener {
     private volatile UUID uuid = null;
     private final Collection<UUID, AtomicInteger> pages = new Collection<>();
 
+    public ReportListGui register() {
+        Bukkit.getPluginManager().registerEvents(this, HackReport.getInstance());
+        return this;
+    }
+
     public ReportListGui prepare(UUID uuid) {
         this.uuid = uuid;
         return this;
@@ -71,11 +76,15 @@ public class ReportListGui implements InventoryHolder, Listener {
         e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
         if (e.getSlot() < 45) {
+            if (!p.hasPermission("hackreport.player")) {
+                p.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+                return;
+            }
             int page = pages.getOrDefault(uuid, new AtomicInteger(1)).get();
             HackReport.PLAYERS.filter(p2 -> p2.getReports() != 0).foreach((player, index) -> {
                 if (index >= 44*(page-1) && index <= 44*page) {
                     if (index-(44*(page-1)) == e.getSlot()) {
-                        p.openInventory(HackReport.PLAYER_ACTION_GUI.prepare(p, player.getName(), player.getUniqueId()).getInventory());
+                        p.openInventory(new PlayerActionGui().register().prepare(p, player.getName(), player.getUniqueId()).getInventory());
                     }
                 }
             });
@@ -86,7 +95,7 @@ public class ReportListGui implements InventoryHolder, Listener {
             if (pages.get(p.getUniqueId()).get() > 1) pages.get(p.getUniqueId()).decrementAndGet();
             p.openInventory(getInventory());
         } else if (e.getSlot() == 49) {
-            p.openInventory(HackReport.REPORT_LIST_2_GUI.prepare(uuid).getInventory());
+            p.openInventory(new ReportList2Gui().register().prepare(uuid).getInventory());
         } else if (e.getSlot() == 53) {
             if (!pages.containsKey(p.getUniqueId())) pages.add(p.getUniqueId(), new AtomicInteger(1));
             pages.get(p.getUniqueId()).incrementAndGet();

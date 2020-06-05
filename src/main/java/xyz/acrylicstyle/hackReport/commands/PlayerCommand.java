@@ -3,12 +3,12 @@ package xyz.acrylicstyle.hackReport.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.api.MojangAPI;
-import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor;
+import xyz.acrylicstyle.hackReport.gui.PlayerActionGui;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 import java.util.UUID;
 
-public class PlayerCommand extends PlayerOpCommandExecutor {
+public class PlayerCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         if (args.length == 0) {
@@ -22,6 +22,6 @@ public class PlayerCommand extends PlayerOpCommandExecutor {
             player.sendMessage(ChatColor.RED + "/player <player>");
             return;
         }
-        player.openInventory(HackReport.PLAYER_ACTION_GUI.prepare(player, args[0], uuid).getInventory());
+        player.openInventory(new PlayerActionGui().register().prepare(player, args[0], uuid).getInventory());
     }
 }
