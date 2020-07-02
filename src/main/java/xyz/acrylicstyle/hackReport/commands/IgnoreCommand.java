@@ -47,7 +47,7 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     new Thread(() -> {
                         webhook.addEmbed(
                                 new DiscordWebhook.EmbedObject()
-                                        .setTitle(player.getName() + "が" + args[1] + "をIgnoreリストに追加しました。")
+                                        .setTitle("`" + player.getName() + "` added `" + args[1] + "` to their ignore list.")
                                         .setColor(Color.YELLOW)
                         );
                         try {
@@ -76,7 +76,7 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     new Thread(() -> {
                         webhook.addEmbed(
                                 new DiscordWebhook.EmbedObject()
-                                        .setTitle(player.getName() + "が" + args[1] + "をIgnoreリストから削除しました。")
+                                        .setTitle("`" + player.getName() + "` removed `" + args[1] + "` from their ignore list。")
                                         .setColor(Color.YELLOW)
                         );
                         try {

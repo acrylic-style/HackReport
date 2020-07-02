@@ -57,7 +57,7 @@ public class MuteCommand extends PlayerCommandExecutor {
                 new Thread(() -> {
                     webhook.addEmbed(
                             new DiscordWebhook.EmbedObject()
-                                    .setTitle(player.getName() + "が" + args[0] + "をミュートしました。")
+                                    .setTitle("`" + player.getName() + "` muted `" + args[0] + "`.")
                                     .setColor(Color.RED)
                     );
                     try {

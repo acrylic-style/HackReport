@@ -61,16 +61,16 @@ public class ReportCommand extends PlayerCommandExecutor {
                             HackReport.REPORTS.add(new ReportDetails(args[0], uuid, list));
                             Utils.getOnlinePlayers().filter(ServerOperator::isOp).forEach(p2 -> {
                                 p2.playSound(p2.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 0);
-                                p2.sendMessage(ChatColor.GREEN + "通報: " + ChatColor.RED + args[0] + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
+                                p2.sendMessage(ChatColor.GREEN + "Report: " + ChatColor.RED + args[0] + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
                             });
                             DiscordWebhook webhook = Utils.getWebhook();
                             if (webhook == null) return;
                             new Thread(() -> {
                                 webhook.addEmbed(
                                         new DiscordWebhook.EmbedObject()
-                                                .setTitle("通報: " + args[0] + " (from " + player.getName() + ")")
+                                                .setTitle("Report: `" + args[0] + "` (from `" + player.getName() + "`)")
                                                 .setColor(Color.RED)
-                                                .setDescription("理由: " + list.join(" "))
+                                                .setDescription("Reason: " + list.join(" "))
                                 );
                                 try {
                                     webhook.execute();

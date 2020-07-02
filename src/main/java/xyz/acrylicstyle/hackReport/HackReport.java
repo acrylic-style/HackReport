@@ -58,6 +58,7 @@ public class HackReport extends JavaPlugin implements Listener {
     public void onEnable() {
         Log.info("Loading configuration");
         config = new ConfigProvider("./plugins/HackReport/config.yml");
+        config.reload(); // ???
         Log.info("Registering commands");
         TomeitoAPI.registerCommand("hackreport", new HackReportCommand());
         TomeitoAPI.registerCommand("player", new PlayerCommand());

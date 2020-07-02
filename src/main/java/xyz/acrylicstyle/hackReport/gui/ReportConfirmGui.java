@@ -86,7 +86,7 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
             new Thread(() -> {
                 webhook.addEmbed(
                         new DiscordWebhook.EmbedObject()
-                                .setTitle("通報: " + target.getName() + " (from " + player.getName() + ")")
+                                .setTitle("Report: `" + target.getName() + "` (from `" + player.getName() + "`)")
                                 .setColor(Color.YELLOW)
                 );
                 try {
