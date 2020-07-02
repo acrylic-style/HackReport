@@ -4,12 +4,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import util.DiscordWebhook;
 import util.ICollection;
 import util.StringCollection;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.utils.Utils;
+import xyz.acrylicstyle.hackReport.utils.Webhook;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
 
@@ -42,12 +42,12 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     collection.add(uuid.toString(), args[1]);
                     saveIgnoreListPlayer(player.getUniqueId(), collection);
                     player.sendMessage(ChatColor.GREEN + "Ignoreリストに" + args[1] + "を追加しました。");
-                    DiscordWebhook webhook = Utils.getWebhook();
+                    Webhook webhook = Utils.getWebhook();
                     if (webhook == null) return;
                     new Thread(() -> {
                         webhook.addEmbed(
-                                new DiscordWebhook.EmbedObject()
-                                        .setTitle("`" + player.getName() + "` added `" + args[1] + "` to their ignore list.")
+                                new Webhook.EmbedObject()
+                                        .setTitle("`" + player.getName() + "`が`" + args[1] + "`をIgnoreリストに追加しました。")
                                         .setColor(Color.YELLOW)
                         );
                         try {
@@ -71,12 +71,12 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     }
                     saveIgnoreListPlayer(player.getUniqueId(), collection);
                     player.sendMessage(ChatColor.GREEN + "Ignoreリストから" + args[1] + "を削除しました。");
-                    DiscordWebhook webhook = Utils.getWebhook();
+                    Webhook webhook = Utils.getWebhook();
                     if (webhook == null) return;
                     new Thread(() -> {
                         webhook.addEmbed(
-                                new DiscordWebhook.EmbedObject()
-                                        .setTitle("`" + player.getName() + "` removed `" + args[1] + "` from their ignore list。")
+                                new Webhook.EmbedObject()
+                                        .setTitle("`" + player.getName() + "`が`" + args[1] + "`をIgnoreリストから削除しました。")
                                         .setColor(Color.YELLOW)
                         );
                         try {

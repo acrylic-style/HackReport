@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
-import util.DiscordWebhook;
 import xyz.acrylicstyle.hackReport.HackReport;
 
 import java.util.List;
@@ -40,11 +39,11 @@ public class Utils {
     }
 
     @Nullable
-    public static DiscordWebhook getWebhook() {
+    public static Webhook getWebhook() {
         String url = HackReport.config.getString("webhook");
         if (url == null) return null;
-        DiscordWebhook webhook = new DiscordWebhook(url);
-        webhook.setUsername("HackReport on " + Bukkit.getName() + Bukkit.getVersion());
+        Webhook webhook = new Webhook(url);
+        webhook.setUsername("HackReport on " + Bukkit.getVersion());
         return webhook;
     }
 }

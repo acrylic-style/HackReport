@@ -6,13 +6,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.ServerOperator;
 import org.bukkit.scheduler.BukkitRunnable;
 import util.CollectionList;
-import util.DiscordWebhook;
 import util.ICollectionList;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.gui.ReportGui;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.hackReport.utils.Utils;
+import xyz.acrylicstyle.hackReport.utils.Webhook;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 
@@ -61,16 +61,16 @@ public class ReportCommand extends PlayerCommandExecutor {
                             HackReport.REPORTS.add(new ReportDetails(args[0], uuid, list));
                             Utils.getOnlinePlayers().filter(ServerOperator::isOp).forEach(p2 -> {
                                 p2.playSound(p2.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 0);
-                                p2.sendMessage(ChatColor.GREEN + "Report: " + ChatColor.RED + args[0] + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
+                                p2.sendMessage(ChatColor.GREEN + "通報: " + ChatColor.RED + args[0] + ChatColor.GREEN + " from " + ChatColor.YELLOW + player.getName());
                             });
-                            DiscordWebhook webhook = Utils.getWebhook();
+                            Webhook webhook = Utils.getWebhook();
                             if (webhook == null) return;
                             new Thread(() -> {
                                 webhook.addEmbed(
-                                        new DiscordWebhook.EmbedObject()
-                                                .setTitle("Report: `" + args[0] + "` (from `" + player.getName() + "`)")
+                                        new Webhook.EmbedObject()
+                                                .setTitle("通報: `" + args[0] + "` (from `" + player.getName() + "`)")
                                                 .setColor(Color.RED)
-                                                .setDescription("Reason: " + list.join(" "))
+                                                .setDescription("理由: " + list.join(" "))
                                 );
                                 try {
                                     webhook.execute();
