@@ -5,7 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
+import util.DiscordWebhook;
+import xyz.acrylicstyle.hackReport.HackReport;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,5 +37,14 @@ public class Utils {
 
     public static ItemStack getItemStack(Material material, String displayName) {
         return getItemStack(material, displayName, null);
+    }
+
+    @Nullable
+    public static DiscordWebhook getWebhook() {
+        String url = HackReport.config.getString("webhook");
+        if (url == null) return null;
+        DiscordWebhook webhook = new DiscordWebhook(url);
+        webhook.setUsername("HackReport on " + Bukkit.getName() + Bukkit.getVersion());
+        return webhook;
     }
 }

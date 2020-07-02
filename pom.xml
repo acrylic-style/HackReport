@@ -66,13 +66,13 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>Util</artifactId>
-            <version>0.11.12</version>
+            <version>0.11.14</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>tomeito_plugin</artifactId>
-            <version>0.5.0</version>
+            <version>0.5.8</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

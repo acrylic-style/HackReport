@@ -4,13 +4,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import util.DiscordWebhook;
 import util.ICollection;
 import util.StringCollection;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
+import xyz.acrylicstyle.hackReport.utils.Utils;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,6 +42,20 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     collection.add(uuid.toString(), args[1]);
                     saveIgnoreListPlayer(player.getUniqueId(), collection);
                     player.sendMessage(ChatColor.GREEN + "Ignoreリストに" + args[1] + "を追加しました。");
+                    DiscordWebhook webhook = Utils.getWebhook();
+                    if (webhook == null) return;
+                    new Thread(() -> {
+                        webhook.addEmbed(
+                                new DiscordWebhook.EmbedObject()
+                                        .setTitle(player.getName() + "が" + args[1] + "をIgnoreリストに追加しました。")
+                                        .setColor(Color.YELLOW)
+                        );
+                        try {
+                            webhook.execute();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 } else if (args[0].equalsIgnoreCase("remove")) {
                     if (args.length == 1) {
                         player.sendMessage(ChatColor.YELLOW + " - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。");
@@ -53,6 +71,20 @@ public class IgnoreCommand extends PlayerCommandExecutor {
                     }
                     saveIgnoreListPlayer(player.getUniqueId(), collection);
                     player.sendMessage(ChatColor.GREEN + "Ignoreリストから" + args[1] + "を削除しました。");
+                    DiscordWebhook webhook = Utils.getWebhook();
+                    if (webhook == null) return;
+                    new Thread(() -> {
+                        webhook.addEmbed(
+                                new DiscordWebhook.EmbedObject()
+                                        .setTitle(player.getName() + "が" + args[1] + "をIgnoreリストから削除しました。")
+                                        .setColor(Color.YELLOW)
+                        );
+                        try {
+                            webhook.execute();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 } else if (args[0].equalsIgnoreCase("list")) {
                     player.sendMessage(ChatColor.GREEN + "Ignoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.getUniqueId()).valuesList().join(ChatColor.GRAY + ", " + ChatColor.YELLOW));
                 } else {

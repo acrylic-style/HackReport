@@ -16,11 +16,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.ServerOperator;
 import org.jetbrains.annotations.NotNull;
+import util.DiscordWebhook;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.hackReport.utils.InventoryUtils;
 import xyz.acrylicstyle.hackReport.utils.Utils;
 import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.Collections;
 
 public class ReportConfirmGui implements InventoryHolder, Listener {
@@ -78,6 +81,20 @@ public class ReportConfirmGui implements InventoryHolder, Listener {
             HackReport.getPlayerInfo(target.getName(), target.getUniqueId()).increaseReports();
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 2);
             player.sendMessage(ChatColor.GREEN + "通報が完了しました。");
+            DiscordWebhook webhook = Utils.getWebhook();
+            if (webhook == null) return;
+            new Thread(() -> {
+                webhook.addEmbed(
+                        new DiscordWebhook.EmbedObject()
+                                .setTitle("通報: " + target.getName() + " (from " + player.getName() + ")")
+                                .setColor(Color.YELLOW)
+                );
+                try {
+                    webhook.execute();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
             player.closeInventory();
         } else if (e.getSlot() == 15) {
             e.getWhoClicked().openInventory(new ReportGui().register().prepare(e.getWhoClicked().getUniqueId()).getInventory());
