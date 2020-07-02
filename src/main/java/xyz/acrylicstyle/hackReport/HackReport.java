@@ -86,25 +86,6 @@ public class HackReport extends JavaPlugin implements Listener {
         Log.info("Enabled HackReport");
     }
 
-    @EventHandler
-    public void onPlayerKick(PlayerKickEvent e) {
-        Webhook webhook = Utils.getWebhook();
-        if (webhook == null) return;
-        new Thread(() -> {
-            webhook.addEmbed(
-                    new Webhook.EmbedObject()
-                            .setTitle("`" + e.getPlayer().getName() + "`をKickしました")
-                            .setColor(Color.RED)
-                            .setDescription("理由: " + e.getReason())
-            );
-            try {
-                webhook.execute();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }).start();
-    }
-
     @SuppressWarnings("unchecked")
     @EventHandler
     public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
