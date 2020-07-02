@@ -11,6 +11,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,10 +21,14 @@ import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.commands.*;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
+import xyz.acrylicstyle.hackReport.utils.Utils;
+import xyz.acrylicstyle.hackReport.utils.Webhook;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -81,6 +86,25 @@ public class HackReport extends JavaPlugin implements Listener {
         Log.info("Enabled HackReport");
     }
 
+    @EventHandler
+    public void onPlayerKick(PlayerKickEvent e) {
+        Webhook webhook = Utils.getWebhook();
+        if (webhook == null) return;
+        new Thread(() -> {
+            webhook.addEmbed(
+                    new Webhook.EmbedObject()
+                            .setTitle("`" + e.getPlayer().getName() + "`をKickしました")
+                            .setColor(Color.RED)
+                            .setDescription("理由: " + e.getReason())
+            );
+            try {
+                webhook.execute();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
+    }
+
     @SuppressWarnings("unchecked")
     @EventHandler
     public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
@@ -136,6 +160,15 @@ public class HackReport extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        if (e.getMessage().startsWith("/kick ") && e.getPlayer().hasPermission("minecraft.command.kick")) {
+            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をKickしました");
+        }
+        if (e.getMessage().startsWith("/ban ") && e.getPlayer().hasPermission("minecraft.command.ban")) {
+            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をBANしました");
+        }
+        if (e.getMessage().startsWith("/ban-ip ") && e.getPlayer().hasPermission("minecraft.command.ban-ip")) {
+            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をIP BANしました");
+        }
         Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(player -> {
             if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
         });
@@ -154,6 +187,28 @@ public class HackReport extends JavaPlugin implements Listener {
                 e.setCancelled(true);
             }
         }
+    }
+
+    public static void sendMessage(PlayerCommandPreprocessEvent e, String message) {
+        String[] args = e.getMessage().split("\\s+");
+        Webhook webhook = Utils.getWebhook();
+        if (webhook == null) return;
+        CollectionList<String> list = new CollectionList<>(args);
+        list.shift();
+        list.shift();
+        new Thread(() -> {
+            webhook.addEmbed(
+                    new Webhook.EmbedObject()
+                            .setTitle(message)
+                            .setColor(Color.RED)
+                            .setDescription("理由: " + list.join(" "))
+            );
+            try {
+                webhook.execute();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
 
     @EventHandler
