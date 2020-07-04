@@ -2,6 +2,7 @@ package xyz.acrylicstyle.hackReport.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import util.ICollection;
@@ -110,7 +111,7 @@ public class IgnoreCommand extends PlayerCommandExecutor {
         return loadIgnoreListPlayer(uuid).containsKey(target.toString());
     }
 
-    public static UUID getUniqueId(String p, Player player) {
+    public static UUID getUniqueId(String p, CommandSender player) {
         UUID uuid;
         try {
             uuid = MojangAPI.getUniqueId(p);
@@ -122,7 +123,7 @@ public class IgnoreCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
             return null;
         }
-        if (player.getUniqueId().equals(uuid)) {
+        if (player instanceof Player && ((Player) player).getUniqueId().equals(uuid)) {
             player.sendMessage(ChatColor.RED + "自分自身に対してそのコマンドを実行することはできません。");
             return null;
         }
