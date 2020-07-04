@@ -31,6 +31,8 @@ public class MuteCommand extends PlayerCommandExecutor {
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "のミュートを解除しました。");
+                CollectionList<String> a = ICollectionList.asList(args);
+                a.shift();
                 Webhook webhook = Utils.getWebhook();
                 if (webhook == null) return;
                 new Thread(() -> {
@@ -38,6 +40,7 @@ public class MuteCommand extends PlayerCommandExecutor {
                             new Webhook.EmbedObject()
                                     .setTitle("`" + player.getName() + "`が`" + args[0] + "`のミュートを解除しました。")
                                     .setColor(Color.GREEN)
+                                    .setDescription("理由: " + a.join(" "))
                     );
                     try {
                         webhook.execute();
@@ -52,6 +55,8 @@ public class MuteCommand extends PlayerCommandExecutor {
             new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
                 p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "をミュートしました。");
+                CollectionList<String> a = ICollectionList.asList(args);
+                a.shift();
                 Webhook webhook = Utils.getWebhook();
                 if (webhook == null) return;
                 new Thread(() -> {
@@ -59,6 +64,7 @@ public class MuteCommand extends PlayerCommandExecutor {
                             new Webhook.EmbedObject()
                                     .setTitle("`" + player.getName() + "`が`" + args[0] + "`をミュートしました。")
                                     .setColor(Color.RED)
+                                    .setDescription("理由: " + a.join(" "))
                     );
                     try {
                         webhook.execute();
