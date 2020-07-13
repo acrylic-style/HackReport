@@ -119,7 +119,7 @@ public class HackReport extends JavaPlugin implements Listener {
                 public void run() {
                     CollectionList<String> list = new CollectionList<>();
                     MojangAPI.getNameChanges(e.getPlayer().getUniqueId()).reverse().foreach((history, index) -> {
-                        if (index > 1 && index < 4) {
+                        if (index >= 1 && index < 4) {
                             list.add(history.getName());
                         }
                     });
