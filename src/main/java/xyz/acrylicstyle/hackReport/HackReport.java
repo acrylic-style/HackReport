@@ -17,7 +17,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 import util.Collection;
 import util.CollectionList;
 import util.ICollectionList;
-import xyz.acrylicstyle.hackReport.commands.*;
+import xyz.acrylicstyle.api.MojangAPI;
+import xyz.acrylicstyle.hackReport.commands.CommandLogCommand;
+import xyz.acrylicstyle.hackReport.commands.HackReportCommand;
+import xyz.acrylicstyle.hackReport.commands.IgnoreCommand;
+import xyz.acrylicstyle.hackReport.commands.MuteAllCommand;
+import xyz.acrylicstyle.hackReport.commands.MuteCommand;
+import xyz.acrylicstyle.hackReport.commands.NameChangesCommand;
+import xyz.acrylicstyle.hackReport.commands.OpChatCommand;
+import xyz.acrylicstyle.hackReport.commands.PlayerCommand;
+import xyz.acrylicstyle.hackReport.commands.ReportCommand;
+import xyz.acrylicstyle.hackReport.commands.ReportsCommand;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.hackReport.utils.Utils;
@@ -73,6 +83,7 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("opchat", new OpChatCommand());
         TomeitoAPI.registerCommand("commandlog", new CommandLogCommand());
         TomeitoAPI.registerCommand("muteall", new MuteAllCommand());
+        TomeitoAPI.registerCommand("namechanges", new NameChangesCommand());
         Log.info("Registering events");
         Bukkit.getPluginManager().registerEvents(this, this);
         new BukkitRunnable() {
@@ -102,6 +113,20 @@ public class HackReport extends JavaPlugin implements Listener {
     @SuppressWarnings("unchecked")
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
+        if (!e.getPlayer().isOp()) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    CollectionList<String> list = new CollectionList<>();
+                    MojangAPI.getNameChanges(e.getPlayer().getUniqueId()).reverse().foreach((history, index) -> {
+                        if (index > 1 && index < 4) {
+                            list.add(history.getName());
+                        }
+                    });
+                    Bukkit.broadcastMessage(ChatColor.GRAY + "(also known as " + list.join(", ") + ")");
+                }
+            }.runTaskLaterAsynchronously(this, 1);
+        }
         String ip = e.getPlayer().getAddress().getAddress().getHostAddress();
         Object o = config.get("ips." + ip);
         if (o == null) return;
@@ -124,7 +149,9 @@ public class HackReport extends JavaPlugin implements Listener {
         e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
         if (muteAll) {
             e.getPlayer().sendMessage("");
+            e.getPlayer().sendMessage("");
             e.getPlayer().sendMessage(ChatColor.YELLOW + "注意: 現在サーバー管理者によってサーバー全体のチャットが制限されています。");
+            e.getPlayer().sendMessage("");
             e.getPlayer().sendMessage("");
         }
     }

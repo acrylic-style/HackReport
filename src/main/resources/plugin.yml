@@ -33,6 +33,9 @@ commands:
   muteall:
     description: "Mutes all server chats. (excludes /tell)"
     permission: hackreport.muteall
+  namechanges:
+    description: "shows name changes"
+    permission: hackreport.namechanges
 permissions:
   hackreport.report:
     description: "allows /report"
