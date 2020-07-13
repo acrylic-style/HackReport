@@ -123,6 +123,7 @@ public class HackReport extends JavaPlugin implements Listener {
                             list.add(history.getName());
                         }
                     });
+                    if (list.size() == 0) return;
                     Bukkit.broadcastMessage(ChatColor.GRAY + "(also known as " + list.join(", ") + ")");
                 }
             }.runTaskLaterAsynchronously(this, 1);
