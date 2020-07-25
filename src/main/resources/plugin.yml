@@ -36,6 +36,9 @@ commands:
   namechanges:
     description: "shows name changes"
     permission: hackreport.namechanges
+  warn:
+    description: "warns player"
+    permission: hackreport.warn
 permissions:
   hackreport.report:
     description: "allows /report"

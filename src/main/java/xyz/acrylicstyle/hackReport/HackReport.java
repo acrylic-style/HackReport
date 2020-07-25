@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 import util.Collection;
 import util.CollectionList;
 import util.ICollectionList;
@@ -28,12 +29,14 @@ import xyz.acrylicstyle.hackReport.commands.OpChatCommand;
 import xyz.acrylicstyle.hackReport.commands.PlayerCommand;
 import xyz.acrylicstyle.hackReport.commands.ReportCommand;
 import xyz.acrylicstyle.hackReport.commands.ReportsCommand;
+import xyz.acrylicstyle.hackReport.commands.WarnCommand;
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
 import xyz.acrylicstyle.hackReport.utils.ReportDetails;
 import xyz.acrylicstyle.hackReport.utils.Utils;
 import xyz.acrylicstyle.hackReport.utils.Webhook;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
+import xyz.acrylicstyle.tomeito_api.sounds.Sound;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.awt.*;
@@ -47,6 +50,7 @@ public class HackReport extends JavaPlugin implements Listener {
     public static final CollectionList<UUID> commandLog = new CollectionList<>();
     public static final Collection<UUID, PlayerInfo> PLAYERS = new Collection<>();
     public static final CollectionList<ReportDetails> REPORTS = new CollectionList<>();
+    public static final Collection<UUID, String> warnQueue = new Collection<>();
     public static ConfigProvider config = null;
     public static boolean muteAll = false;
 
@@ -63,7 +67,8 @@ public class HackReport extends JavaPlugin implements Listener {
         instance = this;
     }
 
-    public static PlayerInfo getPlayerInfo(String name, UUID uuid) {
+    @NotNull
+    public static PlayerInfo getPlayerInfo(@NotNull String name, @NotNull UUID uuid) {
         if (!PLAYERS.containsKey(uuid)) PLAYERS.add(uuid, new PlayerInfo(name, uuid));
         return PLAYERS.get(uuid);
     }
@@ -84,6 +89,7 @@ public class HackReport extends JavaPlugin implements Listener {
         TomeitoAPI.registerCommand("commandlog", new CommandLogCommand());
         TomeitoAPI.registerCommand("muteall", new MuteAllCommand());
         TomeitoAPI.registerCommand("namechanges", new NameChangesCommand());
+        TomeitoAPI.registerCommand("warn", new WarnCommand());
         Log.info("Registering events");
         Bukkit.getPluginManager().registerEvents(this, this);
         new BukkitRunnable() {
@@ -93,6 +99,25 @@ public class HackReport extends JavaPlugin implements Listener {
                 if (provider != null) luckPerms = provider.getProvider();
             }
         }.runTaskLater(this, 1);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                warnQueue.forEach((uuid, warn) -> {
+                     Player player = Bukkit.getPlayer(uuid);
+                     if (player == null) return;
+                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100F, 0F);
+                     player.sendMessage("");
+                     player.sendMessage(ChatColor.GOLD + "===============================");
+                     player.sendMessage("");
+                     player.sendMessage(ChatColor.RED + "Adminからの警告があります。");
+                     player.sendMessage(ChatColor.RED + "内容/理由: " + warn);
+                     player.sendMessage("");
+                     player.sendMessage(ChatColor.GOLD + "===============================");
+                     player.sendMessage("");
+                     warnQueue.remove(uuid);
+                });
+            }
+        }.runTaskTimer(this, 20, 20);
         Log.info("Enabled HackReport");
     }
 
