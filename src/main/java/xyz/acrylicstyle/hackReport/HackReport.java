@@ -217,7 +217,7 @@ public class HackReport extends JavaPlugin implements Listener {
                 e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
                 e.setCancelled(true);
             }
-        } else if (e.getMessage().startsWith("/me")) {
+        } else if (e.getMessage().startsWith("/me ")) {
             if (HackReport.muteAll || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
                 e.getPlayer().sendMessage(ChatColor.RED + "このコマンドを使用することはできません。");
                 e.setCancelled(true);
