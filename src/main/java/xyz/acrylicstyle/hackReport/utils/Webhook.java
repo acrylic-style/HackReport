@@ -28,6 +28,24 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 public class Webhook {
+    public static void sendWebhook(String title, String description, Color color) {
+        Webhook webhook = Utils.getWebhook();
+        if (webhook == null) return;
+        new Thread(() -> {
+            webhook.addEmbed(
+                    new Webhook.EmbedObject()
+                            .setTitle(title)
+                            .setColor(color)
+                            .setDescription(description)
+            );
+            try {
+                webhook.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     @Getter private final String url;
     @Getter @Setter private String content;
     @Getter @Setter private String username;

@@ -8,6 +8,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import util.CollectionList;
 import xyz.acrylicstyle.api.MojangAPI;
 import xyz.acrylicstyle.hackReport.HackReport;
+import xyz.acrylicstyle.joinChecker.utils.Utils;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -18,6 +19,7 @@ public class NameChangesCommand implements CommandExecutor {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if (Utils.modCheck(sender)) return;
                 UUID uuid = MojangAPI.getUniqueId(args[0]);
                 if (uuid == null) {
                     sender.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");

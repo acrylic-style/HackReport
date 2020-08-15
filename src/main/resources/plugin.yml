@@ -5,6 +5,7 @@ softdepend:
   - LuckPerms
 depend:
   - TomeitoLib
+  - JoinChecker
 commands:
   report:
     description: "Report a player."
@@ -23,10 +24,11 @@ commands:
     description: "Ignore specific player's chat"
   mute:
     description: "Mute a player."
-    permission: hackreport.mute
   opchat:
     aliases: "oc"
     permission: hackreport.opchat
+  modchat:
+    aliases: "mc"
   commandlog:
     aliases: ["clog", "cl"]
     permission: hackreport.commandlog
@@ -35,10 +37,14 @@ commands:
     permission: hackreport.muteall
   namechanges:
     description: "shows name changes"
-    permission: hackreport.namechanges
   warn:
     description: "warns player"
-    permission: hackreport.warn
+  playerchecker:
+    description: "Gives player a player checker item"
+  mutelist:
+    permission: hackreport.mutelist
+  "/vanish":
+    permission: hackreport.vanish
 permissions:
   hackreport.report:
     description: "allows /report"

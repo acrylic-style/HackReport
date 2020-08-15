@@ -20,6 +20,10 @@ public class OpChatCommand extends PlayerCommandExecutor {
             HackReport.opChat.remove(player.getUniqueId());
             player.sendMessage(PREFIX + "OPChatをオフにしました。");
         } else {
+            if (HackReport.modChat.contains(player.getUniqueId())) {
+                player.sendMessage(ChatColor.RED + "> OPChatとModChatは同時に使用できません。");
+                return;
+            }
             HackReport.opChat.add(player.getUniqueId());
             player.sendMessage(PREFIX + "OPChatをオンにしました。");
         }
