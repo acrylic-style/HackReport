@@ -239,11 +239,22 @@ public class HackReport extends JavaPlugin implements Listener {
             if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
         });
         if (e.getPlayer().isOp()) return;
-        if (e.getMessage().startsWith("/tell ") || e.getMessage().startsWith("/w ") || e.getMessage().startsWith("/msg ")) {
+        if (e.getMessage().startsWith("/tell ")
+                || e.getMessage().startsWith("/w ")
+                || e.getMessage().startsWith("/msg ")
+                || e.getMessage().startsWith("/t ")
+                || e.getMessage().startsWith("/m ")
+                || e.getMessage().startsWith("/message ")
+                || e.getMessage().startsWith("/lunachat:tell ")
+                || e.getMessage().startsWith("/lunachat:w ")
+                || e.getMessage().startsWith("/lunachat:msg ")
+                || e.getMessage().startsWith("/lunachat:t ")
+                || e.getMessage().startsWith("/lunachat:m ")
+                || e.getMessage().startsWith("/lunachat:message ")) {
             String p = e.getMessage().split(" ")[1];
             Player player = Bukkit.getPlayer(p);
             if (player == null) return;
-            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId()) || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
+            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())) {
                 e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
                 e.setCancelled(true);
             }
