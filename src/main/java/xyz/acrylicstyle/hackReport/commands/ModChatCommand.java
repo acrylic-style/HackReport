@@ -3,11 +3,11 @@ package xyz.acrylicstyle.hackReport.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.ServerOperator;
 import util.ICollectionList;
 import xyz.acrylicstyle.hackReport.HackReport;
 import xyz.acrylicstyle.joinChecker.JoinCheckerManager;
 import xyz.acrylicstyle.joinChecker.utils.Utils;
-import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 import java.util.Objects;
@@ -47,7 +47,7 @@ public class ModChatCommand extends PlayerCommandExecutor {
                     map.keysList()
                             .map((Function<UUID, Player>) Bukkit::getPlayer)
                             .filter(Objects::nonNull)
-                            .concat(TomeitoAPI.getOnlineOperators())
+                            .concat(new xyz.acrylicstyle.joinChecker.libs.util.CollectionList<>(Bukkit.getOnlinePlayers()).map(p -> (Player) p).filter(ServerOperator::isOp))
                             .unique()
                             .forEach(player -> player.sendMessage(ModChatCommand.PREFIX
                                     + ChatColor.GOLD + name
