@@ -8,6 +8,7 @@
     <artifactId>HackReport</artifactId>
     <version>0.0.2</version>
     <build>
+        <finalName>HackReport</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -88,18 +89,6 @@
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>JoinChecker</artifactId>
             <version>1.5.0-SNAPSHOT</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xyz.acrylicstyle</groupId>
-                    <artifactId>java-util-all</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>java-util-all</artifactId>
-            <version>0.11.25b</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
