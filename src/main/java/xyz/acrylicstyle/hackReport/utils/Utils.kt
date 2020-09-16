@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import util.CollectionList
 import xyz.acrylicstyle.hackReport.HackReport
+import xyz.acrylicstyle.hackReport.commands.MuteCommand
 import java.util.Calendar
 import java.util.UUID
 
@@ -46,6 +47,14 @@ object Utils {
             webhook.username = "HackReport on " + Bukkit.getVersion()
             return webhook
         }
+
+    fun timestampToDay(timestamp: Long): String {
+        if (timestamp <= 0) return "0m"
+        val d = timestamp / MuteCommand.DAY
+        val h = (timestamp - d * MuteCommand.DAY) / MuteCommand.HOUR
+        val m = (timestamp - (d * MuteCommand.DAY + h * MuteCommand.HOUR)) / MuteCommand.MINUTE
+        return (if (d < 1) "" else d.toString() + "d") + (if (d < 1 && h < 1) "" else h.toString() + "h") + m + "m"
+    }
 
     fun timestampToDate(timestamp: Long): String {
         val calendar = Calendar.getInstance()

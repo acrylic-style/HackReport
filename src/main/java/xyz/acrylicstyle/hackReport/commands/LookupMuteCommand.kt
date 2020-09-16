@@ -35,7 +35,7 @@ class LookupMuteCommand: CommandExecutor {
                 if (it.expiresAt == -1L) {
                     sender.sendMessage("${ChatColor.YELLOW} - このミュートは永久です。")
                 } else {
-                    sender.sendMessage("${ChatColor.YELLOW} - ミュートが解除される日時: ${ChatColor.LIGHT_PURPLE}${Utils.timestampToDate(it.expiresAt)}")
+                    sender.sendMessage("${ChatColor.YELLOW} - ミュートが解除される日時: ${ChatColor.LIGHT_PURPLE}${Utils.timestampToDate(it.expiresAt)} (あと${Utils.timestampToDay(it.expiresAt - System.currentTimeMillis())})")
                 }
                 sender.sendMessage("${ChatColor.YELLOW}${ChatColor.BOLD}${ChatColor.STRIKETHROUGH}------------------------------")
             }.queue()
