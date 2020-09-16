@@ -7,16 +7,30 @@
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>HackReport</artifactId>
     <version>0.0.2</version>
+
+    <properties>
+        <kotlin.version>1.4.10</kotlin.version>
+    </properties>
+
+
     <build>
         <finalName>HackReport</finalName>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <jvmTarget>1.8</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
@@ -34,6 +48,33 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <!--relocations>
+                        <relocation>
+                            <pattern>util</pattern>
+                            <shadedPattern>xyz.acrylicstyle.hackReport.libs.util</shadedPattern>
+                        </relocation>
+                    </relocations-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>utf-8</encoding>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -71,7 +112,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>tomeito_plugin</artifactId>
-            <version>0.5.8</version>
+            <version>0.5.17</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -90,6 +131,21 @@
             <artifactId>JoinChecker</artifactId>
             <version>1.5.0-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>sequelize4j</artifactId>
+            <version>0.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>java-util-all</artifactId>
+            <version>0.11.26</version>
         </dependency>
     </dependencies>
 </project>

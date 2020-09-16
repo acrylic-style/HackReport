@@ -1,50 +1,48 @@
-package xyz.acrylicstyle.hackReport.commands;
+package xyz.acrylicstyle.hackReport.commands
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.scheduler.BukkitRunnable;
-import util.CollectionList;
-import xyz.acrylicstyle.api.MojangAPI;
-import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.joinChecker.utils.Utils;
+import org.bukkit.ChatColor
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+import org.bukkit.scheduler.BukkitRunnable
+import util.CollectionList
+import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
+import xyz.acrylicstyle.joinChecker.utils.Utils
+import xyz.acrylicstyle.shared.NameHistory
+import java.util.Calendar
+import java.util.function.Consumer
 
-import java.util.Calendar;
-import java.util.UUID;
-
-public class NameChangesCommand implements CommandExecutor {
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (Utils.modCheck(sender)) return;
-                UUID uuid = MojangAPI.getUniqueId(args[0]);
+class NameChangesCommand : CommandExecutor {
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+        object : BukkitRunnable() {
+            override fun run() {
+                if (Utils.modCheck(sender)) return
+                val uuid = MojangAPI.getUniqueId(args[0])
                 if (uuid == null) {
-                    sender.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
-                    return;
+                    sender.sendMessage(ChatColor.RED.toString() + "プレイヤーが見つかりません。")
+                    return
                 }
-                CollectionList<String> list = new CollectionList<>();
-                MojangAPI.getNameChanges(uuid).reverse().foreach((history, index) -> {
-                    String date = "";
-                    if (history.getChangedToAt() != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTimeInMillis(history.getChangedToAt());
-                        int year = cal.get(Calendar.YEAR);
-                        int month = cal.get(Calendar.MONTH) + 1;
-                        int day = cal.get(Calendar.DAY_OF_MONTH);
-                        int hours = cal.get(Calendar.HOUR_OF_DAY);
-                        int minutes = cal.get(Calendar.MINUTE);
-                        int seconds = cal.get(Calendar.SECOND);
-                        date = String.format("%s/%s/%s %s:%s:%s", year, month, day, hours, minutes, seconds);
+                val list = CollectionList<String>()
+                MojangAPI.getNameChanges(uuid).reverse().foreach { history: NameHistory, index: Int ->
+                    var date = ""
+                    if (history.changedToAt != null) {
+                        val cal = Calendar.getInstance()
+                        cal.timeInMillis = history.changedToAt!!
+                        val year = cal[Calendar.YEAR]
+                        val month = cal[Calendar.MONTH] + 1
+                        val day = cal[Calendar.DAY_OF_MONTH]
+                        val hours = cal[Calendar.HOUR_OF_DAY]
+                        val minutes = cal[Calendar.MINUTE]
+                        val seconds = cal[Calendar.SECOND]
+                        date = String.format("%s/%s/%s %s:%s:%s", year, month, day, hours, minutes, seconds)
                     }
-                    list.add(ChatColor.YELLOW + "#" + (index + 1) + ChatColor.GREEN + ": " + ChatColor.GOLD + history.getName()
-                            + "     " + ChatColor.LIGHT_PURPLE + date);
-                });
-                list.forEach(sender::sendMessage);
+                    list.add(ChatColor.YELLOW.toString() + "#" + (index + 1) + ChatColor.GREEN + ": " + ChatColor.GOLD + history.name
+                        + "     " + ChatColor.LIGHT_PURPLE + date)
+                }
+                list.forEach(Consumer { message: String? -> sender.sendMessage(message) })
             }
-        }.runTaskLaterAsynchronously(HackReport.getInstance(), 1);
-        return true;
+        }.runTaskLaterAsynchronously(instance, 1)
+        return true
     }
 }

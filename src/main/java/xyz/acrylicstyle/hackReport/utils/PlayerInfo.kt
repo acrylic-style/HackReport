@@ -1,52 +1,23 @@
-package xyz.acrylicstyle.hackReport.utils;
+package xyz.acrylicstyle.hackReport.utils
 
-import java.util.UUID;
+import java.util.UUID
 
-public class PlayerInfo {
-    private final String name;
-    private final UUID uuid;
-    private int reports = 0;
-    private int kills = 0;
-    private int deaths = 0;
+class PlayerInfo(val name: String, val uniqueId: UUID) {
+    var reports = 0
+    var kills = 0
+        private set
+    var deaths = 0
+        private set
 
-    public PlayerInfo(String name, UUID uuid) {
-        this.name = name;
-        this.uuid = uuid;
+    fun increaseReports() {
+        reports++
     }
 
-    public String getName() {
-        return name;
+    fun increaseKills() {
+        kills++
     }
 
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    public int getReports() {
-        return reports;
-    }
-
-    public void setReports(int reports) {
-        this.reports = reports;
-    }
-
-    public void increaseReports() {
-        this.reports++;
-    }
-
-    public void increaseKills() {
-        this.kills++;
-    }
-
-    public int getKills() {
-        return kills;
-    }
-
-    public void increaseDeaths() {
-        this.deaths++;
-    }
-
-    public int getDeaths() {
-        return deaths;
+    fun increaseDeaths() {
+        deaths++
     }
 }

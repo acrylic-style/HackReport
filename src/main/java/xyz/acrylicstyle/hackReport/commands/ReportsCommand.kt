@@ -1,12 +1,11 @@
-package xyz.acrylicstyle.hackReport.commands;
+package xyz.acrylicstyle.hackReport.commands
 
-import org.bukkit.entity.Player;
-import xyz.acrylicstyle.hackReport.gui.ReportListGui;
-import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import org.bukkit.entity.Player
+import xyz.acrylicstyle.hackReport.gui.ReportListGui
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
 
-public class ReportsCommand extends PlayerCommandExecutor {
-    @Override
-    public void onCommand(Player player, String[] args) {
-        player.openInventory(new ReportListGui().register().prepare(player.getUniqueId()).getInventory());
+class ReportsCommand : PlayerCommandExecutor() {
+    override fun onCommand(player: Player, args: Array<String>) {
+        player.openInventory(ReportListGui().register().prepare(player.uniqueId).inventory)
     }
 }

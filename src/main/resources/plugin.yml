@@ -45,6 +45,8 @@ commands:
     permission: hackreport.mutelist
   "/vanish":
     permission: hackreport.vanish
+  lookupmute:
+    description: ""
 permissions:
   hackreport.report:
     description: "allows /report"

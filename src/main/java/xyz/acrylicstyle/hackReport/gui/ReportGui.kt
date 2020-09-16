@@ -1,112 +1,111 @@
-package xyz.acrylicstyle.hackReport.gui;
+package xyz.acrylicstyle.hackReport.gui
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
-import util.Collection;
-import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.hackReport.utils.Utils;
+import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.inventory.InventoryEvent
+import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.InventoryHolder
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
+import util.Collection
+import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
+import xyz.acrylicstyle.hackReport.utils.Utils.getItemStack
+import xyz.acrylicstyle.hackReport.utils.Utils.getOnlinePlayers
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 
-import java.util.Collections;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class ReportGui implements InventoryHolder, Listener {
-    private volatile UUID uuid = null;
-    private final Collection<UUID, AtomicInteger> pages = new Collection<>();
-
-    public ReportGui register() {
-        Bukkit.getPluginManager().registerEvents(this, HackReport.getInstance());
-        return this;
+class ReportGui : InventoryHolder, Listener {
+    @Volatile
+    private var uuid: UUID? = null
+    private val pages = Collection<UUID?, AtomicInteger>()
+    fun register(): ReportGui {
+        Bukkit.getPluginManager().registerEvents(this, instance)
+        return this
     }
 
-    public ReportGui prepare(UUID uuid) {
-        this.uuid = uuid;
-        return this;
+    fun prepare(uuid: UUID?): ReportGui {
+        this.uuid = uuid
+        return this
     }
 
-    private Inventory setItems() {
-        int page = pages.getOrDefault(uuid, new AtomicInteger(1)).get();
-        Inventory inventory = Bukkit.createInventory(this, 54, ChatColor.GREEN + "プレイヤーの行動を通報 - ページ" + page);
-        Utils.getOnlinePlayers(uuid).foreach((player, index) -> {
-            if (index >= 44*(page-1) && index <= 44*page) {
-                ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-                SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-                skullMeta.setOwner(player.getName());
-                skullMeta.setDisplayName(ChatColor.RED + player.getName() + ChatColor.YELLOW + "を通報する");
-                skullMeta.setLore(Collections.singletonList(ChatColor.RED + "注意: 虚偽の通報をすると通報権限の剥奪や処罰が行われる可能性があります。"));
-                skull.setItemMeta(skullMeta);
-                inventory.setItem(index-(44*(page-1)), skull);
+    private fun setItems(): Inventory {
+        val page = pages.getOrDefault(uuid, AtomicInteger(1)).get()
+        val inventory = Bukkit.createInventory(this, 54, ChatColor.GREEN.toString() + "プレイヤーの行動を通報 - ページ" + page)
+        getOnlinePlayers(uuid!!).foreach { player: Player, index: Int ->
+            if (index >= 44 * (page - 1) && index <= 44 * page) {
+                val skull = ItemStack(Material.SKULL_ITEM, 1, 3.toShort())
+                val skullMeta = skull.itemMeta as SkullMeta
+                skullMeta.owner = player.name
+                skullMeta.displayName = ChatColor.RED.toString() + player.name + ChatColor.YELLOW + "を通報する"
+                skullMeta.lore = listOf(ChatColor.RED.toString() + "注意: 虚偽の通報をすると通報権限の剥奪や処罰が行われる可能性があります。")
+                skull.itemMeta = skullMeta
+                inventory.setItem(index - 44 * (page - 1), skull)
             }
-        });
-        inventory.setItem(45, Utils.getItemStack(Material.ARROW, ChatColor.YELLOW + "←前のページ"));
-        inventory.setItem(49, Utils.getItemStack(Material.BARRIER, ChatColor.YELLOW + "閉じる"));
-        inventory.setItem(53, Utils.getItemStack(Material.ARROW, ChatColor.YELLOW + "次のページ→"));
-        return inventory;
+        }
+        inventory.setItem(45, getItemStack(Material.ARROW, ChatColor.YELLOW.toString() + "←前のページ"))
+        inventory.setItem(49, getItemStack(Material.BARRIER, ChatColor.YELLOW.toString() + "閉じる"))
+        inventory.setItem(53, getItemStack(Material.ARROW, ChatColor.YELLOW.toString() + "次のページ→"))
+        return inventory
     }
 
-    @Override
-    public Inventory getInventory() {
-        return setItems();
+    override fun getInventory(): Inventory {
+        return setItems()
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getInventory().getHolder() != this) return;
-        if (e.getClickedInventory() == null || e.getClickedInventory().getHolder() != this) return;
-        e.setCancelled(true);
-        Player p = (Player) e.getWhoClicked();
-        if (e.getSlot() < 45) {
-            int page = pages.getOrDefault(uuid, new AtomicInteger(1)).get();
-            Utils.getOnlinePlayers(uuid).foreach((player, index) -> {
-                if (index >= 44*(page-1) && index <= 44*page) {
-                    if (index-(44*(page-1)) == e.getSlot()) {
-                        p.openInventory(new ReportConfirmGui().register().prepare(p, player).getInventory());
+    fun onInventoryClick(e: InventoryClickEvent) {
+        if (e.inventory.holder !== this) return
+        if (e.clickedInventory == null || e.clickedInventory.holder !== this) return
+        e.isCancelled = true
+        val p = e.whoClicked as Player
+        if (e.slot < 45) {
+            val page = pages.getOrDefault(uuid, AtomicInteger(1)).get()
+            getOnlinePlayers(uuid!!).foreach { player: Player?, index: Int ->
+                if (index >= 44 * (page - 1) && index <= 44 * page) {
+                    if (index - 44 * (page - 1) == e.slot) {
+                        p.openInventory(ReportConfirmGui().register().prepare(p, player!!).inventory)
                     }
                 }
-            });
-            return;
+            }
+            return
         }
-        if (e.getSlot() == 45) {
-            if (!pages.containsKey(p.getUniqueId())) pages.add(p.getUniqueId(), new AtomicInteger(1));
-            if (pages.get(p.getUniqueId()).get() > 1) pages.get(p.getUniqueId()).decrementAndGet();
-            p.openInventory(getInventory());
-        } else if (e.getSlot() == 49) {
-            p.closeInventory();
-        } else if (e.getSlot() == 53) {
-            if (!pages.containsKey(p.getUniqueId())) pages.add(p.getUniqueId(), new AtomicInteger(1));
-            pages.get(p.getUniqueId()).incrementAndGet();
-            p.openInventory(getInventory());
+        if (e.slot == 45) {
+            if (!pages.containsKey(p.uniqueId)) pages.add(p.uniqueId, AtomicInteger(1))
+            if (pages[p.uniqueId]!!.get() > 1) pages[p.uniqueId]!!.decrementAndGet()
+            p.openInventory(inventory)
+        } else if (e.slot == 49) {
+            p.closeInventory()
+        } else if (e.slot == 53) {
+            if (!pages.containsKey(p.uniqueId)) pages.add(p.uniqueId, AtomicInteger(1))
+            pages[p.uniqueId]!!.incrementAndGet()
+            p.openInventory(inventory)
         }
     }
 
     @EventHandler
-    public void onInventoryDragEvent(InventoryDragEvent e) {
-        if (e.getInventory().getHolder() != this) return;
-        e.setCancelled(true);
+    fun onInventoryDragEvent(e: InventoryDragEvent) {
+        if (e.inventory.holder !== this) return
+        e.isCancelled = true
     }
 
     @EventHandler
-    public void onInventoryEvent(InventoryEvent e) {
-        if (e.getInventory().getHolder() != this) return;
+    fun onInventoryEvent(e: InventoryEvent) {
+        if (e.inventory.holder !== this) return
         try {
-            e.getClass().getMethod("setCancelled", boolean.class).invoke(e, true);
-        } catch (ReflectiveOperationException ignore) {}
+            e.javaClass.getMethod("setCancelled", Boolean::class.javaPrimitiveType).invoke(e, true)
+        } catch (ignore: ReflectiveOperationException) {
+        }
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        pages.remove(e.getPlayer().getUniqueId()); // there is no inventory holder check, intentionally.
+    fun onInventoryClose(e: InventoryCloseEvent) {
+        pages.remove(e.player.uniqueId) // there is no inventory holder check, intentionally.
     }
 }

@@ -1,44 +1,23 @@
-package xyz.acrylicstyle.hackReport.utils;
+package xyz.acrylicstyle.hackReport.utils
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import java.util.UUID
 
-import java.util.UUID;
+class HackReportPlayer(val uniqueId: UUID) {
+    val player: Player?
+    val isOnline: Boolean
+        get() = player != null && player.isOnline
+    val health: Double
+        get() = player?.health ?: 0.0
+    val foodLevel: Int
+        get() = player?.foodLevel ?: 0
+    val isFlying: Boolean
+        get() = player != null && player.isFlying
+    val allowFlight: Boolean
+        get() = player != null && player.allowFlight
 
-public class HackReportPlayer {
-    @NotNull private final UUID uuid;
-    @Nullable private final Player player;
-
-    public HackReportPlayer(@NotNull UUID uuid) {
-        this.uuid = uuid;
-        this.player = Bukkit.getPlayer(uuid);
-    }
-
-    @NotNull
-    public UUID getUniqueId() {
-        return uuid;
-    }
-
-    @Nullable
-    public Player getPlayer() {
-        return player;
-    }
-
-    public boolean isOnline() {
-        return player != null && player.isOnline();
-    }
-
-    public double getHealth() {
-        return player == null ? 0D : player.getHealth();
-    }
-
-    public int getFoodLevel() {
-        return player == null ? 0 : player.getFoodLevel();
-    }
-
-    public boolean isFlying() {
-        return player != null && player.isFlying();
+    init {
+        player = Bukkit.getPlayer(uniqueId)
     }
 }

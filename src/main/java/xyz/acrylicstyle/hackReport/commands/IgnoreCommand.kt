@@ -1,136 +1,125 @@
-package xyz.acrylicstyle.hackReport.commands;
+package xyz.acrylicstyle.hackReport.commands
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import util.ICollection;
-import util.StringCollection;
-import xyz.acrylicstyle.api.MojangAPI;
-import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.hackReport.utils.Utils;
-import xyz.acrylicstyle.hackReport.utils.Webhook;
-import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
+import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
+import util.ICollection
+import util.StringCollection
+import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
+import xyz.acrylicstyle.hackReport.utils.Utils.webhook
+import xyz.acrylicstyle.hackReport.utils.Webhook
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
+import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider
+import java.awt.Color
+import java.io.IOException
+import java.util.HashMap
+import java.util.UUID
 
-import java.awt.*;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-public class IgnoreCommand extends PlayerCommandExecutor {
-    @Override
-    public void onCommand(Player player, String[] args) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (args.length == 0) {
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。");
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。");
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。");
-                    return;
+class IgnoreCommand : PlayerCommandExecutor() {
+    override fun onCommand(player: Player, args: Array<String>) {
+        object : BukkitRunnable() {
+            override fun run() {
+                if (args.size == 0) {
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。")
+                    return
                 }
-                if (args[0].equalsIgnoreCase("add")) {
-                    if (args.length == 1) {
-                        player.sendMessage(ChatColor.YELLOW + " - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。");
-                        return;
+                if (args[0].equals("add", ignoreCase = true)) {
+                    if (args.size == 1) {
+                        player.sendMessage("${ChatColor.YELLOW} - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
+                        return
                     }
-                    UUID uuid = getUniqueId(args[1], player);
-                    if (uuid == null) return;
-                    StringCollection<String> collection = loadIgnoreListPlayer(player.getUniqueId()).clone();
-                    collection.add(uuid.toString(), args[1]);
-                    saveIgnoreListPlayer(player.getUniqueId(), collection);
-                    player.sendMessage(ChatColor.GREEN + "Ignoreリストに" + args[1] + "を追加しました。");
-                    Webhook webhook = Utils.getWebhook();
-                    if (webhook == null) return;
-                    new Thread(() -> {
+                    val uuid = getUniqueId(args[1], player) ?: return
+                    val collection = loadIgnoreListPlayer(player.uniqueId).clone()
+                    collection.add(uuid.toString(), args[1])
+                    saveIgnoreListPlayer(player.uniqueId, collection)
+                    player.sendMessage("${ChatColor.GREEN}Ignoreリストに" + args[1] + "を追加しました。")
+                    val webhook = webhook ?: return
+                    Thread {
                         webhook.addEmbed(
-                                new Webhook.EmbedObject()
-                                        .setTitle("`" + player.getName() + "`が`" + args[1] + "`をIgnoreリストに追加しました。")
-                                        .setColor(Color.YELLOW)
-                        );
+                            Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`をIgnoreリストに追加しました。"; color = Color.YELLOW }
+                        )
                         try {
-                            webhook.execute();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            webhook.execute()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
                         }
-                    }).start();
-                } else if (args[0].equalsIgnoreCase("remove")) {
-                    if (args.length == 1) {
-                        player.sendMessage(ChatColor.YELLOW + " - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。");
-                        return;
+                    }.start()
+                } else if (args[0].equals("remove", ignoreCase = true)) {
+                    if (args.size == 1) {
+                        player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
+                        return
                     }
-                    UUID uuid = getUniqueId(args[1], player);
-                    if (uuid == null) return;
-                    StringCollection<String> collection = loadIgnoreListPlayer(player.getUniqueId()).clone();
-                    String removed = collection.remove(uuid.toString());
+                    val uuid = getUniqueId(args[1], player) ?: return
+                    val collection = loadIgnoreListPlayer(player.uniqueId).clone()
+                    val removed = collection.remove(uuid.toString())
                     if (removed == null) {
-                        player.sendMessage(ChatColor.RED + args[1] + "はIgnoreリストにいません。");
-                        return;
+                        player.sendMessage(ChatColor.RED.toString() + args[1] + "はIgnoreリストにいません。")
+                        return
                     }
-                    saveIgnoreListPlayer(player.getUniqueId(), collection);
-                    player.sendMessage(ChatColor.GREEN + "Ignoreリストから" + args[1] + "を削除しました。");
-                    Webhook webhook = Utils.getWebhook();
-                    if (webhook == null) return;
-                    new Thread(() -> {
+                    saveIgnoreListPlayer(player.uniqueId, collection)
+                    player.sendMessage("${ChatColor.GREEN}Ignoreリストから" + args[1] + "を削除しました。")
+                    val webhook = webhook ?: return
+                    Thread {
                         webhook.addEmbed(
-                                new Webhook.EmbedObject()
-                                        .setTitle("`" + player.getName() + "`が`" + args[1] + "`をIgnoreリストから削除しました。")
-                                        .setColor(Color.YELLOW)
-                        );
+                            Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`をIgnoreリストから削除しました。"; color = Color.YELLOW }
+                        )
                         try {
-                            webhook.execute();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            webhook.execute()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
                         }
-                    }).start();
-                } else if (args[0].equalsIgnoreCase("list")) {
-                    player.sendMessage(ChatColor.GREEN + "Ignoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.getUniqueId()).valuesList().join(ChatColor.GRAY + ", " + ChatColor.YELLOW));
+                    }.start()
+                } else if (args[0].equals("list", ignoreCase = true)) {
+                    player.sendMessage("${ChatColor.GREEN}Ignoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.uniqueId).valuesList().join("${ChatColor.GRAY}, ${ChatColor.YELLOW}"))
                 } else {
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。");
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。");
-                    player.sendMessage(ChatColor.YELLOW + " - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。");
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。")
                 }
             }
-        }.runTaskAsynchronously(HackReport.getInstance());
+        }.runTaskAsynchronously(instance)
     }
 
-    public static StringCollection<String> loadIgnoreListPlayer(UUID uuid) {
-        Map<String, Object> map2 = ConfigProvider.getConfig("./plugins/HackReport/players/" + uuid.toString() + ".yml").getConfigSectionValue("ignore", true);
-        if (map2 == null) return new StringCollection<>();
-        return new StringCollection<>(ICollection.asCollection(map2).mapValues((s, o) -> (String) o));
-    }
+    companion object {
+        fun loadIgnoreListPlayer(uuid: UUID): StringCollection<String> {
+            val map2 = ConfigProvider.getConfig("./plugins/HackReport/players/$uuid.yml").getConfigSectionValue("ignore", true)
+                ?: return StringCollection()
+            return StringCollection(ICollection.asCollection(map2).mapValues { _: String?, o: Any -> o as String })
+        }
 
-    public static void saveIgnoreListPlayer(UUID uuid, StringCollection<String> collection) {
-        ConfigProvider.getConfig("./plugins/HackReport/players/" + uuid.toString() + ".yml").setThenSave("ignore", new HashMap<>(collection));
-    }
+        fun saveIgnoreListPlayer(uuid: UUID, collection: StringCollection<String>?) {
+            ConfigProvider.getConfig("./plugins/HackReport/players/$uuid.yml").setThenSave("ignore", HashMap(collection))
+        }
 
-    public static boolean isPlayerIgnored(UUID uuid, UUID target) {
-        return loadIgnoreListPlayer(uuid).containsKey(target.toString());
-    }
+        fun isPlayerIgnored(uuid: UUID, target: UUID): Boolean {
+            return loadIgnoreListPlayer(uuid).containsKey(target.toString())
+        }
 
-    public static UUID getUniqueId(String p, CommandSender player) {
-        UUID uuid;
-        try {
-            uuid = MojangAPI.getUniqueId(p);
-        } catch (RuntimeException e) {
-            player.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
-            return null;
+        fun getUniqueId(p: String?, player: CommandSender): UUID? {
+            val uuid: UUID? = try {
+                MojangAPI.getUniqueId(p!!)
+            } catch (e: RuntimeException) {
+                player.sendMessage("${ChatColor.RED}プレイヤーが見つかりません。")
+                return null
+            }
+            if (uuid == null) {
+                player.sendMessage("${ChatColor.RED}プレイヤーが見つかりません。")
+                return null
+            }
+            if (player is Player && player.uniqueId == uuid) {
+                player.sendMessage("${ChatColor.RED}自分自身に対してそのコマンドを実行することはできません。")
+                return null
+            }
+            if (Bukkit.getOfflinePlayer(uuid).isOp) {
+                player.sendMessage("${ChatColor.RED}OPを対象にすることはできません。")
+                return null
+            }
+            return uuid
         }
-        if (uuid == null) {
-            player.sendMessage(ChatColor.RED + "プレイヤーが見つかりません。");
-            return null;
-        }
-        if (player instanceof Player && ((Player) player).getUniqueId().equals(uuid)) {
-            player.sendMessage(ChatColor.RED + "自分自身に対してそのコマンドを実行することはできません。");
-            return null;
-        }
-        if (Bukkit.getOfflinePlayer(uuid).isOp()) {
-            player.sendMessage(ChatColor.RED + "OPを対象にすることはできません。");
-            return null;
-        }
-        return uuid;
     }
 }

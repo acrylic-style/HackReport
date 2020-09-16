@@ -1,349 +1,396 @@
-package xyz.acrylicstyle.hackReport;
+package xyz.acrylicstyle.hackReport
 
-import net.luckperms.api.LuckPerms;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-import util.Collection;
-import util.CollectionList;
-import util.CollectionSet;
-import util.ICollectionList;
-import xyz.acrylicstyle.api.MojangAPI;
-import xyz.acrylicstyle.hackReport.commands.CommandLogCommand;
-import xyz.acrylicstyle.hackReport.commands.HackReportCommand;
-import xyz.acrylicstyle.hackReport.commands.IgnoreCommand;
-import xyz.acrylicstyle.hackReport.commands.ModChatCommand;
-import xyz.acrylicstyle.hackReport.commands.MuteAllCommand;
-import xyz.acrylicstyle.hackReport.commands.MuteCommand;
-import xyz.acrylicstyle.hackReport.commands.MuteListCommand;
-import xyz.acrylicstyle.hackReport.commands.NameChangesCommand;
-import xyz.acrylicstyle.hackReport.commands.OpChatCommand;
-import xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand;
-import xyz.acrylicstyle.hackReport.commands.PlayerCommand;
-import xyz.acrylicstyle.hackReport.commands.ReportCommand;
-import xyz.acrylicstyle.hackReport.commands.ReportsCommand;
-import xyz.acrylicstyle.hackReport.commands.VanishCommand;
-import xyz.acrylicstyle.hackReport.commands.WarnCommand;
-import xyz.acrylicstyle.hackReport.utils.PlayerInfo;
-import xyz.acrylicstyle.hackReport.utils.ReportDetails;
-import xyz.acrylicstyle.hackReport.utils.Webhook;
-import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
-import xyz.acrylicstyle.tomeito_api.events.player.EntityDamageByPlayerEvent;
-import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider;
-import xyz.acrylicstyle.tomeito_api.sounds.Sound;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
+import net.luckperms.api.LuckPerms
+import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.Material
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
+import org.bukkit.event.Event
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
+import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.AsyncPlayerChatEvent
+import org.bukkit.event.player.PlayerCommandPreprocessEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
+import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.potion.PotionEffect
+import org.bukkit.scheduler.BukkitRunnable
+import util.Collection
+import util.CollectionList
+import util.CollectionSet
+import util.Watchdog
+import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
+import xyz.acrylicstyle.hackReport.commands.HackReportCommand
+import xyz.acrylicstyle.hackReport.commands.IgnoreCommand
+import xyz.acrylicstyle.hackReport.commands.LookupMuteCommand
+import xyz.acrylicstyle.hackReport.commands.ModChatCommand
+import xyz.acrylicstyle.hackReport.commands.MuteAllCommand
+import xyz.acrylicstyle.hackReport.commands.MuteCommand
+import xyz.acrylicstyle.hackReport.commands.MuteListCommand
+import xyz.acrylicstyle.hackReport.commands.NameChangesCommand
+import xyz.acrylicstyle.hackReport.commands.OpChatCommand
+import xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand
+import xyz.acrylicstyle.hackReport.commands.PlayerCommand
+import xyz.acrylicstyle.hackReport.commands.ReportCommand
+import xyz.acrylicstyle.hackReport.commands.ReportsCommand
+import xyz.acrylicstyle.hackReport.commands.VanishCommand
+import xyz.acrylicstyle.hackReport.commands.WarnCommand
+import xyz.acrylicstyle.hackReport.utils.ConnectionHolder
+import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
+import xyz.acrylicstyle.hackReport.utils.PlayerInfo
+import xyz.acrylicstyle.hackReport.utils.ReportDetails
+import xyz.acrylicstyle.hackReport.utils.Webhook
+import xyz.acrylicstyle.shared.NameHistory
+import xyz.acrylicstyle.tomeito_api.TomeitoAPI
+import xyz.acrylicstyle.tomeito_api.events.player.EntityDamageByPlayerEvent
+import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider
+import xyz.acrylicstyle.tomeito_api.sounds.Sound
+import xyz.acrylicstyle.tomeito_api.utils.Log
+import java.awt.Color
+import java.util.Objects
+import java.util.UUID
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.stream.Collectors
+import kotlin.math.roundToInt
 
-import java.awt.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-public class HackReport extends JavaPlugin implements Listener {
-    public static final CollectionSet<UUID> opChat = new CollectionSet<>();
-    public static final CollectionSet<UUID> modChat = new CollectionSet<>();
-    public static final CollectionList<UUID> commandLog = new CollectionList<>();
-    public static final Collection<UUID, PlayerInfo> PLAYERS = new Collection<>();
-    public static final CollectionList<ReportDetails> REPORTS = new CollectionList<>();
-    public static final Collection<UUID, String> warnQueue = new Collection<>();
-    public static final CollectionSet<UUID> vanishedPlayers = new CollectionSet<>();
-    public static ConfigProvider config = null;
-    public static boolean muteAll = false;
-
-    public static LuckPerms luckPerms = null;
-
-    private static HackReport instance;
-
-    public static HackReport getInstance() {
-        return instance;
+class HackReport : JavaPlugin(), Listener {
+    override fun onLoad() {
+        instance = this
+        Thread {
+            Log.info("Loading classes")
+            val start = System.currentTimeMillis()
+            preloadClass("xyz.acrylicstyle.hackReport.HackReport$1")
+            preloadClass("xyz.acrylicstyle.hackReport.HackReport$2")
+            preloadClass("xyz.acrylicstyle.hackReport.HackReport$3")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.Utils")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.ReportDetails")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.Webhook")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.PlayerInfo")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.InventoryUtils")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.HackReportPlayer")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.ConnectionHolder")
+            preloadClass("xyz.acrylicstyle.hackReport.utils.ConnectionHolder\$Companion")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.PlayerActionGui")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.PlayerActionGui$1")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.ReportConfirmGui")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.ReportGui")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.ReportList2Gui")
+            preloadClass("xyz.acrylicstyle.hackReport.gui.ReportListGui")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.CommandLogCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.HackReportCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreCommand$1")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.ModChatCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.MuteAllCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.MuteCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.MuteListCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.NameChangesCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.NameChangesCommand$1")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.OpChatCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand$1")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.PlayerCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.ReportCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.ReportCommand$1")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.ReportCommand$2")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.ReportsCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.VanishCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.WarnCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.MuteList")
+            val end = System.currentTimeMillis()
+            Log.info("Loaded classes in ${end - start}ms")
+        }.start()
     }
 
-    @Override
-    public void onLoad() {
-        instance = this;
+    private fun preloadClass(clazz: String) {
+        try {
+            Class.forName(clazz)
+        } catch (ignore: ClassNotFoundException) {}
     }
 
-    @NotNull
-    public static PlayerInfo getPlayerInfo(@NotNull String name, @NotNull UUID uuid) {
-        if (!PLAYERS.containsKey(uuid)) PLAYERS.add(uuid, new PlayerInfo(name, uuid));
-        return PLAYERS.get(uuid);
-    }
-
-    @Override
-    public void onEnable() {
-        Log.info("Loading configuration");
-        config = new ConfigProvider("./plugins/HackReport/config.yml");
-        config.reload(); // ???
-        Log.info("Registering commands");
-        TomeitoAPI.registerCommand("hackreport", new HackReportCommand());
-        TomeitoAPI.registerCommand("player", new PlayerCommand());
-        TomeitoAPI.registerCommand("report", new ReportCommand());
-        TomeitoAPI.registerCommand("reports", new ReportsCommand());
-        TomeitoAPI.registerCommand("ignore", new IgnoreCommand());
-        TomeitoAPI.registerCommand("mute", new MuteCommand());
-        TomeitoAPI.registerCommand("opchat", new OpChatCommand());
-        TomeitoAPI.registerCommand("modchat", new ModChatCommand());
-        TomeitoAPI.registerCommand("commandlog", new CommandLogCommand());
-        TomeitoAPI.registerCommand("muteall", new MuteAllCommand());
-        TomeitoAPI.registerCommand("namechanges", new NameChangesCommand());
-        TomeitoAPI.registerCommand("warn", new WarnCommand());
-        TomeitoAPI.registerCommand("mutelist", new MuteListCommand());
-        TomeitoAPI.registerCommand("playerchecker", new PlayerCheckerCommand());
-        TomeitoAPI.registerCommand("/vanish", new VanishCommand());
-        Log.info("Registering events");
-        Bukkit.getPluginManager().registerEvents(this, this);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-                if (provider != null) luckPerms = provider.getProvider();
-            }
-        }.runTaskLater(this, 1);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                warnQueue.forEach((uuid, warn) -> {
-                     Player player = Bukkit.getPlayer(uuid);
-                     if (player == null) return;
-                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_PLING, 100F, 0F);
-                     player.sendMessage("");
-                     player.sendMessage(ChatColor.GOLD + "===============================");
-                     player.sendMessage("");
-                     player.sendMessage(ChatColor.RED + "Adminからの警告があります。");
-                     player.sendMessage(ChatColor.RED + "内容/理由: " + warn);
-                     player.sendMessage("");
-                     player.sendMessage(ChatColor.GOLD + "===============================");
-                     player.sendMessage("");
-                     warnQueue.remove(uuid);
-                });
-            }
-        }.runTaskTimer(this, 20, 20);
-        Log.info("Enabled HackReport");
-    }
-
-    @SuppressWarnings("unchecked")
-    @EventHandler
-    public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
-        if (Bukkit.getOfflinePlayer(e.getUniqueId()).isOp()) return;
-        String ip = e.getAddress().getHostAddress();
-        Object o = config.get("ips." + ip);
-        if (o == null) return;
-        Map<String, Object> map = ConfigProvider.getConfigSectionValue(o, true);
-        if (map == null) return;
-        boolean kickPlayer = (boolean) map.get("kickPlayer");
-        CollectionList<String> kickMessage = ICollectionList.asList((List<String>) map.get("kickMessage")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
-        if (kickPlayer) e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, kickMessage.join("\n"));
-    }
-
-    @SuppressWarnings({ "unchecked", "RedundantCast" })
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        vanishedPlayers.map((Function<UUID, Player>) Bukkit::getPlayer).filter(Objects::nonNull).filter(p -> !p.getUniqueId().equals(e.getPlayer().getUniqueId())).forEach(player -> e.getPlayer().hidePlayer(player));
-        if (vanishedPlayers.contains(e.getPlayer().getUniqueId())) {
-            Bukkit.getOnlinePlayers().forEach(p -> p.hidePlayer(e.getPlayer()));
-        }
-        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwner(e.getPlayer().getName()); // fetch first
-        if (!e.getPlayer().isOp()) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    CollectionList<String> list = new CollectionList<>();
-                    MojangAPI.getNameChanges(e.getPlayer().getUniqueId()).reverse().foreach((history, index) -> {
-                        if (index >= 1 && index < 4) {
-                            list.add(history.getName());
-                        }
-                    });
-                    if (list.size() == 0) return;
-                    Bukkit.broadcastMessage(ChatColor.GRAY + "(also known as " + list.join(", ") + ")");
+    override fun onEnable() {
+        Log.info("Loading configuration")
+        HackReport.config = ConfigProvider("./plugins/HackReport/config.yml")
+        val host = HackReport.config!!.getString("database.host")
+        val name = HackReport.config!!.getString("database.name")
+        val username = HackReport.config!!.getString("database.username")
+        val password = HackReport.config!!.getString("database.password")
+        if (host == null || name == null || username == null || password == null) {
+            Log.info("Not using database")
+        } else {
+            Log.info("Database(mysql) will be used.")
+            Thread {
+                Log.with("HackReport").info("Connecting to the database")
+                connection = ConnectionHolder(host, name, username, password)
+                if (ConnectionHolder.ready) {
+                    Log.with("HackReport").info("Connected to the database.")
+                } else {
+                    Log.with("HackReport").info("Something went wrong while connecting to the database.")
                 }
-            }.runTaskLaterAsynchronously(this, 1);
+            }.start()
         }
-        String ip = e.getPlayer().getAddress().getAddress().getHostAddress();
-        Object o = config.get("ips." + ip);
-        if (o == null) return;
-        Map<String, Object> map = ConfigProvider.getConfigSectionValue(o, true);
-        if (map == null) return;
-        boolean kickPlayer = (boolean) map.get("kickPlayer");
-        CollectionList<String> kickMessage = ICollectionList.asList((List<String>) map.get("kickMessage")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
-        if (e.getPlayer().isOp() && kickPlayer) {
-            e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
-            e.getPlayer().sendMessage(ChatColor.RED + "このIPアドレスからの接続は制限されています。");
-            e.getPlayer().sendMessage(ChatColor.GOLD + "理由:");
-            kickMessage.forEach(e.getPlayer()::sendMessage);
-            e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+        Log.info("Registering commands")
+        TomeitoAPI.registerCommand("hackreport", HackReportCommand())
+        TomeitoAPI.registerCommand("player", PlayerCommand())
+        TomeitoAPI.registerCommand("report", ReportCommand())
+        TomeitoAPI.registerCommand("reports", ReportsCommand())
+        TomeitoAPI.registerCommand("ignore", IgnoreCommand())
+        TomeitoAPI.registerCommand("mute", MuteCommand())
+        TomeitoAPI.registerCommand("opchat", OpChatCommand())
+        TomeitoAPI.registerCommand("modchat", ModChatCommand())
+        TomeitoAPI.registerCommand("commandlog", CommandLogCommand())
+        TomeitoAPI.registerCommand("muteall", MuteAllCommand())
+        TomeitoAPI.registerCommand("namechanges", NameChangesCommand())
+        TomeitoAPI.registerCommand("warn", WarnCommand())
+        TomeitoAPI.registerCommand("mutelist", MuteListCommand())
+        TomeitoAPI.registerCommand("lookupmute", LookupMuteCommand())
+        TomeitoAPI.registerCommand("playerchecker", PlayerCheckerCommand())
+        TomeitoAPI.registerCommand("/vanish", VanishCommand())
+        Log.info("Registering events")
+        Bukkit.getPluginManager().registerEvents(this, this)
+        object : BukkitRunnable() {
+            override fun run() {
+                val provider = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)
+                if (provider != null) luckPerms = provider.provider
+            }
+        }.runTaskLater(this, 1)
+        object : BukkitRunnable() {
+            override fun run() {
+                warnQueue.clone().forEach { uuid: UUID, warn: String ->
+                    val player = Bukkit.getPlayer(uuid) ?: return@forEach
+                    player.playSound(player.location, Sound.BLOCK_NOTE_PLING, 100f, 0f)
+                    player.sendMessage("")
+                    player.sendMessage(ChatColor.GOLD.toString() + "===============================")
+                    player.sendMessage("")
+                    player.sendMessage(ChatColor.RED.toString() + "Adminからの警告があります。")
+                    player.sendMessage(ChatColor.RED.toString() + "内容/理由: " + warn)
+                    player.sendMessage("")
+                    player.sendMessage(ChatColor.GOLD.toString() + "===============================")
+                    player.sendMessage("")
+                    warnQueue.remove(uuid)
+                }
+            }
+        }.runTaskTimerAsynchronously(this, 20, 20)
+        Log.info("Enabled HackReport")
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    @EventHandler
+    fun onPlayerJoin(e: PlayerJoinEvent) {
+        vanishedPlayers.map(Function { id: UUID? -> Bukkit.getPlayer(id) } as Function<UUID?, Player>).filter { obj: Player? -> Objects.nonNull(obj) }.filter { p: Player -> p.uniqueId != e.player.uniqueId }.forEach(Consumer { player: Player? -> e.player.hidePlayer(player) })
+        if (vanishedPlayers.contains(e.player.uniqueId)) {
+            Bukkit.getOnlinePlayers().forEach { p: Player -> p.hidePlayer(e.player) }
         }
-        CollectionList<String> messages = ICollectionList.asList((List<String>) map.get("messages")).map(s -> ChatColor.translateAlternateColorCodes('&', s));
-        e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
-        e.getPlayer().sendMessage(ChatColor.RED + "このIPアドレスからの接続は推奨されていません。");
-        e.getPlayer().sendMessage(ChatColor.GOLD + "理由:");
-        messages.forEach(e.getPlayer()::sendMessage);
-        e.getPlayer().sendMessage(ChatColor.GOLD + "------------------------------");
+        val skull = ItemStack(Material.SKULL_ITEM, 1, 3.toShort())
+        val skullMeta = skull.itemMeta as SkullMeta
+        skullMeta.owner = e.player.name // fetch first
+        if (!e.player.isOp) {
+            object : BukkitRunnable() {
+                override fun run() {
+                    val list = CollectionList<String>()
+                    MojangAPI.getNameChanges(e.player.uniqueId).reverse().foreach { history: NameHistory, index: Int ->
+                        if (index in 1..3) {
+                            list.add(history.name)
+                        }
+                    }
+                    if (list.size == 0) return
+                    Bukkit.broadcastMessage(ChatColor.GRAY.toString() + "(also known as " + list.join(", ") + ")")
+                }
+            }.runTaskLaterAsynchronously(this, 1)
+        }
         if (muteAll) {
-            e.getPlayer().sendMessage(ChatColor.GOLD + "==============================");
-            e.getPlayer().sendMessage("");
-            e.getPlayer().sendMessage(ChatColor.YELLOW + "注意: 現在サーバー管理者によってサーバー全体のチャットが制限されています。");
-            e.getPlayer().sendMessage("");
-            e.getPlayer().sendMessage(ChatColor.GOLD + "==============================");
+            e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
+            e.player.sendMessage("")
+            e.player.sendMessage(ChatColor.YELLOW.toString() + "注意: 現在サーバー管理者によってサーバー全体のチャットが制限されています。")
+            e.player.sendMessage("")
+            e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
         }
+        muteList.get(e.player.uniqueId).then { // remove mute when it expires
+            if (it == null) return@then
+            if (it.expiresAt == -1L) return@then
+            if (System.currentTimeMillis() > it.expiresAt) {
+                Log.info("Removing mute for ${e.player.name} automatically: mute expired")
+                muteList.remove(e.player.uniqueId)
+                e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
+                e.player.sendMessage("${ChatColor.GREEN}一定時間が経過したためミュートが自動的に解除されました。")
+                e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
+            }
+        }.queue()
     }
 
-    @Override
-    public void onDisable() {
-        config.save();
-    }
-
-    public static CollectionList<UUID> getMutedPlayers() {
-        return ICollectionList.asList(config.getStringList("muted")).map(UUID::fromString);
+    override fun onDisable() {
+        Watchdog("HackReport#disable", {
+            connection?.close()
+        }, 1000 * 10, {
+            Log.warn("Could not close database connection within 10 seconds!")
+        }).start()
     }
 
     @EventHandler
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (e.getMessage().startsWith("/kick ") && e.getPlayer().hasPermission("minecraft.command.kick")) {
-            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をKickしました");
+    fun onPlayerCommandPreprocess(e: PlayerCommandPreprocessEvent) {
+        if (e.message.startsWith("/kick ") && e.player.hasPermission("minecraft.command.kick")) {
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をKickしました")
         }
-        if (e.getMessage().startsWith("/pardon ") && e.getPlayer().hasPermission("minecraft.command.pardon")) {
-            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`のBANを解除しました");
+        if (e.message.startsWith("/pardon ") && e.player.hasPermission("minecraft.command.pardon")) {
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`のBANを解除しました")
         }
-        if (e.getMessage().startsWith("/ban ") && e.getPlayer().hasPermission("minecraft.command.ban")) {
-            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をBANしました");
+        if (e.message.startsWith("/ban ") && e.player.hasPermission("minecraft.command.ban")) {
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をBANしました")
         }
-        if (e.getMessage().startsWith("/ban-ip ") && e.getPlayer().hasPermission("minecraft.command.ban-ip")) {
-            sendMessage(e, "`" + e.getPlayer().getName() + "`が`" + e.getMessage().split("\\s+")[1] + "`をIP BANしました");
+        if (e.message.startsWith("/ban-ip ") && e.player.hasPermission("minecraft.command.ban-ip")) {
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をIP BANしました")
         }
-        Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(player -> {
-            if (commandLog.contains(player.getUniqueId())) player.sendMessage(ChatColor.GRAY + "[CMD] " + e.getPlayer().getName() + " sent command: " + e.getMessage());
-        });
-        if (e.getPlayer().isOp()) return;
-        if (e.getMessage().startsWith("/tell ")
-                || e.getMessage().startsWith("/w ")
-                || e.getMessage().startsWith("/msg ")
-                || e.getMessage().startsWith("/t ")
-                || e.getMessage().startsWith("/m ")
-                || e.getMessage().startsWith("/message ")
-                || e.getMessage().startsWith("/lunachat:tell ")
-                || e.getMessage().startsWith("/lunachat:w ")
-                || e.getMessage().startsWith("/lunachat:msg ")
-                || e.getMessage().startsWith("/lunachat:t ")
-                || e.getMessage().startsWith("/lunachat:m ")
-                || e.getMessage().startsWith("/lunachat:message ")) {
-            String p = e.getMessage().split(" ")[1];
-            Player player = Bukkit.getPlayer(p);
-            if (player == null) return;
-            if (IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())) {
-                e.getPlayer().sendMessage(ChatColor.RED + "このプレイヤーにプライベートメッセージを送信することはできません。");
-                e.setCancelled(true);
+        Bukkit.getOnlinePlayers().stream().filter { obj: Player -> obj.isOp }.forEach { player: Player -> if (commandLog.contains(player.uniqueId)) player.sendMessage(ChatColor.GRAY.toString() + "[CMD] " + e.player.name + " sent command: " + e.message) }
+        if (e.player.isOp) return
+        if (e.message.startsWith("/tell ")
+            || e.message.startsWith("/w ")
+            || e.message.startsWith("/msg ")
+            || e.message.startsWith("/t ")
+            || e.message.startsWith("/m ")
+            || e.message.startsWith("/message ")
+            || e.message.startsWith("/lunachat:tell ")
+            || e.message.startsWith("/lunachat:w ")
+            || e.message.startsWith("/lunachat:msg ")
+            || e.message.startsWith("/lunachat:t ")
+            || e.message.startsWith("/lunachat:m ")
+            || e.message.startsWith("/lunachat:message ")) {
+            val p = e.message.split(" ").toTypedArray()[1]
+            val player = Bukkit.getPlayer(p) ?: return
+            if (IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId)) {
+                e.player.sendMessage(ChatColor.RED.toString() + "このプレイヤーにプライベートメッセージを送信することはできません。")
+                e.isCancelled = true
             }
-        } else if (e.getMessage().startsWith("/me ") || e.getMessage().startsWith("/g ") || e.getMessage().split(" ")[0].endsWith(":g")) {
-            if (HackReport.muteAll || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
-                e.getPlayer().sendMessage(ChatColor.RED + "このコマンドを使用することはできません。");
-                e.setCancelled(true);
+        } else if (e.message.startsWith("/me ") || e.message.startsWith("/g ") || e.message.split(" ").toTypedArray()[0].endsWith(":g")) {
+            if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId))) {
+                e.player.sendMessage(ChatColor.RED.toString() + "このコマンドを使用することはできません。")
+                e.isCancelled = true
             }
         }
-    }
-
-    public static void sendMessage(PlayerCommandPreprocessEvent e, String message) {
-        String[] args = e.getMessage().split("\\s+");
-        CollectionList<String> list = new CollectionList<>(args);
-        list.shift();
-        list.shift();
-        Webhook.sendWebhook(message, "理由: " + list.join(" "), Color.RED);
     }
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        Player killer = e.getEntity().getKiller();
+    fun onPlayerDeath(e: PlayerDeathEvent) {
+        val killer = e.entity.killer
         if (killer != null) {
-            getPlayerInfo(killer.getName(), killer.getUniqueId()).increaseKills();
+            getPlayerInfo(killer.name, killer.uniqueId).increaseKills()
         }
-        getPlayerInfo(e.getEntity().getName(), e.getEntity().getUniqueId()).increaseDeaths();
+        getPlayerInfo(e.entity.name, e.entity.uniqueId).increaseDeaths()
     }
 
     @EventHandler
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
-        if (e.getPlayer().isOp() && opChat.contains(e.getPlayer().getUniqueId())) {
-            e.setCancelled(true);
-            OpChatCommand.Do(e.getPlayer().getName(), e.getMessage());
-            return;
+    fun onAsyncPlayerChat(e: AsyncPlayerChatEvent) {
+        if (e.player.isOp && opChat.contains(e.player.uniqueId)) {
+            e.isCancelled = true
+            OpChatCommand.Do(e.player.name, e.message)
+            return
         }
-        if (modChat.contains(e.getPlayer().getUniqueId())) {
-            e.setCancelled(true);
-            ModChatCommand.Do(e.getPlayer().getName(), e.getMessage());
-            return;
+        if (modChat.contains(e.player.uniqueId)) {
+            e.isCancelled = true
+            ModChatCommand.Do(e.player.name, e.message)
+            return
         }
-        if (e.getPlayer().isOp()) return;
-        if (HackReport.muteAll || getMutedPlayers().contains(e.getPlayer().getUniqueId())) {
-            e.getRecipients().clear();
-            return;
+        if (e.player.isOp) return
+        if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId))) {
+            e.recipients.clear()
+            return
         }
-        e.getRecipients().removeIf((player -> IgnoreCommand.isPlayerIgnored(player.getUniqueId(), e.getPlayer().getUniqueId())));
+        e.recipients.removeIf { player: Player -> IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId) }
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (e.getItem() == null || !e.getItem().isSimilar(PlayerCheckerCommand.ITEM)) return;
-        e.setUseItemInHand(Event.Result.DENY);
-        e.setUseInteractedBlock(Event.Result.DENY);
-        Location location = e.getPlayer().getLocation().clone();
-        CollectionList<Entity> entities = new CollectionList<>(e.getPlayer().getWorld().getNearbyEntities(location, 15, 15, 15));
-        new Thread(() -> {
-            e.getPlayer().sendMessage(ChatColor.YELLOW + "===== Player Finder =====");
-            entities.filter(entity -> entity instanceof Player)
-                    .map(entity -> (Player) entity)
-                    .filter(player -> !e.getPlayer().getUniqueId().equals(player.getUniqueId()))
-                    .stream()
-                    .sorted((a, b) -> (int) (a.getLocation().distance(location) - b.getLocation().distance(location)))
-                    .collect(Collectors.toCollection(CollectionList::new))
-                    .forEach(player -> {
-                        double distance = Math.round(player.getLocation().distance(location) * 100) / 100D;
-                        e.getPlayer().sendMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + ": " + ChatColor.LIGHT_PURPLE + distance + ChatColor.YELLOW + "ブロック");
-                    });
-            e.getPlayer().sendMessage(ChatColor.YELLOW + "============================");
-        }).start();
+    fun onPlayerInteract(e: PlayerInteractEvent) {
+        if (e.action != Action.RIGHT_CLICK_AIR && e.action != Action.RIGHT_CLICK_BLOCK) return
+        if (e.item == null || !e.item.isSimilar(PlayerCheckerCommand.ITEM)) return
+        e.setUseItemInHand(Event.Result.DENY)
+        e.setUseInteractedBlock(Event.Result.DENY)
+        val location = e.player.location.clone()
+        val entities = CollectionList(e.player.world.getNearbyEntities(location, 15.0, 15.0, 15.0))
+        Thread {
+            e.player.sendMessage(ChatColor.YELLOW.toString() + "===== Player Finder =====")
+            entities.filter { entity: Entity? -> entity is Player }
+                .map { entity: Entity -> entity as Player }
+                .filter { player: Player -> e.player.uniqueId != player.uniqueId }
+                .stream()
+                .sorted { a: Player, b: Player -> (a.location.distance(location) - b.location.distance(location)).toInt() }
+                .collect(Collectors.toCollection { CollectionList() })
+                .forEach(Consumer { player: Player ->
+                    val distance = (player.location.distance(location) * 100).roundToInt() / 100.0
+                    e.player.sendMessage(ChatColor.GREEN.toString() + player.name + ChatColor.YELLOW + ": " + ChatColor.LIGHT_PURPLE + distance + ChatColor.YELLOW + "ブロック")
+                })
+            e.player.sendMessage(ChatColor.YELLOW.toString() + "============================")
+        }.start()
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onEntityDamageByPlayer(EntityDamageByPlayerEvent e) {
-        if (!e.getDamager().getInventory().getItemInHand().isSimilar(PlayerCheckerCommand.ITEM)) return;
-        e.setCancelled(true);
-        if (e.getEntity().getType() != EntityType.PLAYER) return;
-        Player player = (Player) e.getEntity();
-        e.getDamager().sendMessage(ChatColor.YELLOW + "===== Player Finder: " + ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " =====");
-        e.getDamager().sendMessage(ChatColor.GREEN + " - Display Name: " + ChatColor.RESET + ChatColor.WHITE + player.getDisplayName());
-        e.getDamager().sendMessage(ChatColor.GREEN + " - UUID: " + ChatColor.RED + player.getUniqueId().toString());
-        e.getDamager().sendMessage(ChatColor.GREEN + " - Health: " + ChatColor.RED + Math.round(player.getHealth()*100)/100D + ChatColor.YELLOW + " / " + ChatColor.RED + player.getMaxHealth());
-        e.getDamager().sendMessage(ChatColor.GREEN + " - Food Level: " + ChatColor.RED + player.getFoodLevel() + ChatColor.YELLOW + " / " + ChatColor.RED + "20");
-        player.getActivePotionEffects().forEach(pe -> {
-            String name = pe.getType().getName().toLowerCase().replaceAll("_", " ");
-            int duration = pe.getDuration() / 20;
-            int level = pe.getAmplifier();
-            e.getDamager().sendMessage(ChatColor.GREEN + " - Potion Effect: " + ChatColor.LIGHT_PURPLE + name + ChatColor.RED + " x" + level + ChatColor.YELLOW + " (" + TomeitoAPI.secondsToTime(duration) + ")");
-        });
-        e.getDamager().sendMessage(ChatColor.YELLOW + "=================================");
+    fun onEntityDamageByPlayer(e: EntityDamageByPlayerEvent) {
+        if (!e.damager.inventory.itemInHand.isSimilar(PlayerCheckerCommand.ITEM)) return
+        e.isCancelled = true
+        if (e.entity.type != EntityType.PLAYER) return
+        val player = e.entity as Player
+        e.damager.sendMessage(ChatColor.YELLOW.toString() + "===== Player Finder: " + ChatColor.GREEN + player.name + ChatColor.YELLOW + " =====")
+        e.damager.sendMessage(ChatColor.GREEN.toString() + " - Display Name: " + ChatColor.RESET + ChatColor.WHITE + player.displayName)
+        e.damager.sendMessage(ChatColor.GREEN.toString() + " - UUID: " + ChatColor.RED + player.uniqueId.toString())
+        e.damager.sendMessage(ChatColor.GREEN.toString() + " - Health: " + ChatColor.RED + (player.health * 100).roundToInt() / 100.0 + ChatColor.YELLOW + " / " + ChatColor.RED + player.maxHealth)
+        e.damager.sendMessage(ChatColor.GREEN.toString() + " - Food Level: " + ChatColor.RED + player.foodLevel + ChatColor.YELLOW + " / " + ChatColor.RED + "20")
+        e.damager.sendMessage(ChatColor.GREEN.toString() + " - Can Fly: " + ChatColor.RED + (if (player.allowFlight) "Yes" else "No"))
+        player.activePotionEffects.forEach(Consumer { pe: PotionEffect ->
+            val name = pe.type.name.toLowerCase().replace("_".toRegex(), " ")
+            val duration = pe.duration / 20
+            val level = pe.amplifier
+            e.damager.sendMessage(ChatColor.GREEN.toString() + " - Potion Effect: " + ChatColor.LIGHT_PURPLE + name + ChatColor.RED + " x" + level + ChatColor.YELLOW + " (" + TomeitoAPI.secondsToTime(duration) + ")")
+        })
+        e.damager.sendMessage(ChatColor.YELLOW.toString() + "=================================")
+    }
+
+    companion object {
+        @JvmField
+        val opChat = CollectionSet<UUID>()
+        @JvmField
+        val modChat = CollectionSet<UUID>()
+        @JvmField
+        val commandLog = CollectionList<UUID>()
+        @JvmField
+        val PLAYERS = Collection<UUID, PlayerInfo>()
+        @JvmField
+        val REPORTS = CollectionList<ReportDetails>()
+        @JvmField
+        val warnQueue = Collection<UUID, String>()
+        @JvmField
+        val vanishedPlayers = CollectionSet<UUID?>()
+        @JvmField
+        var config: ConfigProvider? = null
+        @JvmField
+        var muteAll = false
+        @JvmField
+        var luckPerms: LuckPerms? = null
+        @JvmStatic
+        var instance: HackReport? = null
+            private set
+
+        @JvmStatic
+        var connection: ConnectionHolder? = null
+
+        @JvmStatic
+        fun getPlayerInfo(name: String, uuid: UUID): PlayerInfo {
+            if (!PLAYERS.containsKey(uuid)) PLAYERS.add(uuid, PlayerInfo(name, uuid))
+            return PLAYERS[uuid]!!
+        }
+
+        fun sendMessage(e: PlayerCommandPreprocessEvent, message: String?) {
+            val args = e.message.split("\\s+").toTypedArray()
+            val list = CollectionList(*args)
+            list.shift()
+            list.shift()
+            Webhook.sendWebhook(message, "理由: " + list.join(" "), Color.RED)
+        }
     }
 }

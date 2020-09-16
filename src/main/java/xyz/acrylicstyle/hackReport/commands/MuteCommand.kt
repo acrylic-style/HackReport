@@ -1,57 +1,92 @@
-package xyz.acrylicstyle.hackReport.commands;
+package xyz.acrylicstyle.hackReport.commands
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import util.CollectionList;
-import util.ICollectionList;
-import xyz.acrylicstyle.hackReport.HackReport;
-import xyz.acrylicstyle.hackReport.utils.Webhook;
-import xyz.acrylicstyle.joinChecker.utils.Utils;
-import xyz.acrylicstyle.tomeito_api.sounds.Sound;
+import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.command.Command
+import org.bukkit.command.CommandExecutor
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import util.CollectionList
+import util.ICollectionList
+import xyz.acrylicstyle.hackReport.struct.Mute
+import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
+import xyz.acrylicstyle.hackReport.utils.Webhook
+import xyz.acrylicstyle.joinChecker.utils.Utils
+import xyz.acrylicstyle.tomeito_api.TomeitoAPI
+import xyz.acrylicstyle.tomeito_api.sounds.Sound
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil
+import java.awt.Color
+import java.util.function.Consumer
 
-import java.awt.*;
-import java.util.UUID;
-
-public class MuteCommand implements CommandExecutor {
-    @Override
-    public boolean onCommand(CommandSender player, Command command, String label, String[] args) {
-        new Thread(() -> {
-            if (Utils.modCheck(player)) return;
-            if (args.length == 0) {
-                player.sendMessage(ChatColor.RED + "/mute <Player> " + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーをミュート/ミュート解除します。");
-                return;
+class MuteCommand : CommandExecutor {
+    override fun onCommand(player: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+        Thread t@ {
+            if (Utils.modCheck(player)) return@t
+            if (args.isEmpty()) {
+                player.sendMessage("${ChatColor.RED}/mute <Player> [<time> <m/h/d>] [reason] ${ChatColor.GRAY}- ${ChatColor.AQUA}プレイヤーをミュート/ミュート解除します。")
+                return@t
             }
-            CollectionList<UUID> list = ICollectionList.asList(HackReport.config.getStringList("muted")).map(UUID::fromString);
-            UUID uuid = IgnoreCommand.getUniqueId(args[0], player);
-            if (uuid == null) return;
-            if (list.contains(uuid)) {
-                list.remove(uuid);
-                HackReport.config.setThenSave("muted", list.map(UUID::toString).toList());
-                CollectionList<String> a = ICollectionList.asList(args);
-                a.shift();
-                new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
-                    //p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "のミュートを解除しました。");
-                });
-                Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + "が" + args[0] + "のミュートを解除しました" + (a.size() == 0 ? "。" : ": " + a.join(" ")));
-                Webhook.sendWebhook("`" + player.getName() + "`が`" + args[0] + "`のミュートを解除しました。", "理由: " + a.join(" "), Color.GREEN);
+            val ps = args[0]
+            val arg: CollectionList<String>
+            run {
+                val list = ICollectionList.asList(args) // doing this in block intentionally, to prevent access to "list" from outside of this
+                if (args.size > 1) {
+                    if (args[1].matches("\\d+[mhd]".toRegex())) {
+                        list.shift()
+                        list.shift()
+                        list.add(0, args[1].replace("\\d+([mhd])".toRegex(), "$1"))
+                        list.add(0, args[1].replace("(\\d+)[mhd]".toRegex(), "$1"))
+                        list.add(0, ps)
+                    }
+                }
+                arg = list.clone()
+            }
+            val uuid = IgnoreCommand.getUniqueId(arg.shift(), player) ?: return@t
+            var expiresAt = -1L
+            if (arg.size >= 3) {
+                if (TypeUtil.isInt(arg[0])) {
+                    expiresAt = when (arg[1]) {
+                        "d" -> System.currentTimeMillis() + arg[0].toLong() * DAY
+                        "h" -> System.currentTimeMillis() + arg[0].toLong() * HOUR
+                        "m" -> System.currentTimeMillis() + arg[0].toLong() * MINUTE
+                        else -> -1
+                    }
+                    if (expiresAt != -1L) arg.shiftChain().shiftChain()
+                }
+            }
+            val reason = arg.join(" ")
+            val emptyReason = arg.isEmpty()
+            if (muteList.contains(uuid)) {
+                muteList.remove(uuid)
+                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player -> p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f) })
+                Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が" + ps + "のミュートを解除しました" + if (emptyReason) "。" else ": $reason")
+                Webhook.sendWebhook("`${player.name}`が`${ps}`のミュートを解除しました。", "理由: $reason", Color.GREEN)
             } else {
-                list.add(uuid);
-                HackReport.config.setThenSave("muted", list.map(UUID::toString).toList());
-                CollectionList<String> a = ICollectionList.asList(args);
-                a.shift();
-                new CollectionList<Player>(Bukkit.getOnlinePlayers()).filter(Player::isOp).forEach(p -> {
-                    p.playSound(p.getLocation(), Sound.BLOCK_NOTE_PLING, 100, 1);
-                    //p.sendMessage(ChatColor.YELLOW + player.getName() + ChatColor.GREEN + "が" + ChatColor.RED + args[0] + ChatColor.GREEN + "をミュートしました。");
-                });
-                Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + "が" + args[0] + "をミュートしました" + (a.size() == 0 ? "。" : ": " + a.join(" ")));
-                Webhook.sendWebhook("`" + player.getName() + "`が`" + args[0] + "`をミュートしました。", "理由: " + a.join(" "), Color.RED);
+                if (emptyReason) {
+                    player.sendMessage("${ChatColor.RED}理由を指定してください。")
+                    return@t
+                }
+                muteList.add(
+                    Mute(
+                        uuid,
+                        ps,
+                        reason,
+                        if (player is Player) player.uniqueId else null,
+                        System.currentTimeMillis(),
+                        expiresAt,
+                    )
+                )
+                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player -> p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f) })
+                Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が${ps}をミュートしました: $reason")
+                Webhook.sendWebhook("`${player.name}`が`${ps}`をミュートしました。", "理由: $reason", Color.RED)
             }
-        }).start();
-        return true;
+        }.start()
+        return true
+    }
+
+    companion object {
+        const val DAY: Long = 86_400_000
+        const val HOUR: Long = 3_600_000
+        const val MINUTE: Long =  60_000
     }
 }

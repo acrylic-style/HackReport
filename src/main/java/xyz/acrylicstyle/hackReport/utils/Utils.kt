@@ -1,49 +1,62 @@
-package xyz.acrylicstyle.hackReport.utils;
+package xyz.acrylicstyle.hackReport.utils
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
-import util.CollectionList;
-import xyz.acrylicstyle.hackReport.HackReport;
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import util.CollectionList
+import xyz.acrylicstyle.hackReport.HackReport
+import java.util.Calendar
+import java.util.UUID
 
-import java.util.List;
-import java.util.UUID;
+object Utils {
+    @JvmStatic
+    val onlinePlayers: CollectionList<Player>
+        get() {
+            val players = CollectionList<Player>()
+            players.addAll(Bukkit.getOnlinePlayers())
+            return players
+        }
 
-public class Utils {
-    public static CollectionList<Player> getOnlinePlayers() {
-        CollectionList<Player> players = new CollectionList<>();
-        players.addAll(Bukkit.getOnlinePlayers());
-        return players;
+    fun getOnlinePlayers(you: UUID): CollectionList<Player> {
+        val players = CollectionList<Player>()
+        players.addAll(Bukkit.getOnlinePlayers())
+        return players.filter { p: Player -> p.uniqueId != you && !p.isOp }
     }
 
-    public static CollectionList<Player> getOnlinePlayers(UUID you) {
-        CollectionList<Player> players = new CollectionList<>();
-        players.addAll(Bukkit.getOnlinePlayers());
-        return players.filter(p -> !p.getUniqueId().equals(you) && !p.isOp());
+    private fun getItemStack(material: Material?, displayName: String?, lore: List<String?>?): ItemStack {
+        val item = ItemStack(material)
+        val meta = item.itemMeta
+        if (displayName != null) meta.displayName = displayName
+        if (lore != null) meta.lore = lore
+        item.itemMeta = meta
+        return item
     }
 
-    public static ItemStack getItemStack(Material material, String displayName, List<String> lore) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        if (displayName != null) meta.setDisplayName(displayName);
-        if (lore != null) meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+    @JvmStatic
+    fun getItemStack(material: Material?, displayName: String?): ItemStack {
+        return getItemStack(material, displayName, null)
     }
 
-    public static ItemStack getItemStack(Material material, String displayName) {
-        return getItemStack(material, displayName, null);
-    }
+    @JvmStatic
+    val webhook: Webhook?
+        get() {
+            val url = HackReport.config!!.getString("webhook") ?: return null
+            val webhook = Webhook(url)
+            webhook.username = "HackReport on " + Bukkit.getVersion()
+            return webhook
+        }
 
-    @Nullable
-    public static Webhook getWebhook() {
-        String url = HackReport.config.getString("webhook");
-        if (url == null) return null;
-        Webhook webhook = new Webhook(url);
-        webhook.setUsername("HackReport on " + Bukkit.getVersion());
-        return webhook;
+    fun timestampToDate(timestamp: Long): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timestamp
+        val m = calendar[Calendar.MINUTE].toString()
+        val s = calendar[Calendar.SECOND].toString()
+        return (calendar[Calendar.YEAR].toString() + "/"
+            + (calendar[Calendar.MONTH] + 1) + "/"
+            + calendar[Calendar.DAY_OF_MONTH] + " "
+            + calendar[Calendar.HOUR_OF_DAY] + ":"
+            + (if (m.length == 1) "0$m" else m) + ":"
+            + if (s.length == 1) "0$s" else s)
     }
 }
