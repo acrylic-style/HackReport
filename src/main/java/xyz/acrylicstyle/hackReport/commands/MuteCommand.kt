@@ -42,6 +42,7 @@ class MuteCommand : CommandExecutor {
                 arg = list.clone()
             }
             val uuid = IgnoreCommand.getUniqueId(arg.shift(), player) ?: return@t
+            val d7 = System.currentTimeMillis() + 7 * DAY
             var expiresAt = -1L
             if (arg.size >= 3) {
                 if (TypeUtil.isInt(arg[0])) {
@@ -54,6 +55,7 @@ class MuteCommand : CommandExecutor {
                     if (expiresAt != -1L) arg.shiftChain().shiftChain()
                 }
             }
+            if (expiresAt == -1L) expiresAt = d7
             val reason = arg.join(" ")
             val emptyReason = arg.isEmpty()
             if (muteList.contains(uuid)) {
