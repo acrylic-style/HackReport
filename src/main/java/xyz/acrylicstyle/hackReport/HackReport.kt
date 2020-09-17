@@ -71,6 +71,7 @@ class HackReport : JavaPlugin(), Listener {
             preloadClass("xyz.acrylicstyle.hackReport.HackReport$1")
             preloadClass("xyz.acrylicstyle.hackReport.HackReport$2")
             preloadClass("xyz.acrylicstyle.hackReport.HackReport$3")
+            preloadClass("xyz.acrylicstyle.hackReport.HackReport\$onDisable\$1")
             preloadClass("xyz.acrylicstyle.hackReport.utils.Utils")
             preloadClass("xyz.acrylicstyle.hackReport.utils.ReportDetails")
             preloadClass("xyz.acrylicstyle.hackReport.utils.Webhook")
@@ -238,16 +239,16 @@ class HackReport : JavaPlugin(), Listener {
     @EventHandler
     fun onPlayerCommandPreprocess(e: PlayerCommandPreprocessEvent) {
         if (e.message.startsWith("/kick ") && e.player.hasPermission("minecraft.command.kick")) {
-            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をKickしました")
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+".toRegex()).toTypedArray()[1] + "`をKickしました")
         }
         if (e.message.startsWith("/pardon ") && e.player.hasPermission("minecraft.command.pardon")) {
-            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`のBANを解除しました")
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+".toRegex()).toTypedArray()[1] + "`のBANを解除しました")
         }
         if (e.message.startsWith("/ban ") && e.player.hasPermission("minecraft.command.ban")) {
-            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をBANしました")
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+".toRegex()).toTypedArray()[1] + "`をBANしました")
         }
         if (e.message.startsWith("/ban-ip ") && e.player.hasPermission("minecraft.command.ban-ip")) {
-            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+").toTypedArray()[1] + "`をIP BANしました")
+            sendMessage(e, "`" + e.player.name + "`が`" + e.message.split("\\s+".toRegex()).toTypedArray()[1] + "`をIP BANしました")
         }
         Bukkit.getOnlinePlayers().stream().filter { obj: Player -> obj.isOp }.forEach { player: Player -> if (commandLog.contains(player.uniqueId)) player.sendMessage(ChatColor.GRAY.toString() + "[CMD] " + e.player.name + " sent command: " + e.message) }
         if (e.player.isOp) return
@@ -263,13 +264,13 @@ class HackReport : JavaPlugin(), Listener {
             || e.message.startsWith("/lunachat:t ")
             || e.message.startsWith("/lunachat:m ")
             || e.message.startsWith("/lunachat:message ")) {
-            val p = e.message.split(" ").toTypedArray()[1]
+            val p = e.message.split("\\s+".toRegex()).toTypedArray()[1]
             val player = Bukkit.getPlayer(p) ?: return
             if (IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId)) {
                 e.player.sendMessage(ChatColor.RED.toString() + "このプレイヤーにプライベートメッセージを送信することはできません。")
                 e.isCancelled = true
             }
-        } else if (e.message.startsWith("/me ") || e.message.startsWith("/g ") || e.message.split(" ").toTypedArray()[0].endsWith(":g")) {
+        } else if (e.message.startsWith("/me ") || e.message.startsWith("/g ") || e.message.split("\\s+".toRegex()).toTypedArray()[0].endsWith(":g")) {
             if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId))) {
                 e.player.sendMessage(ChatColor.RED.toString() + "このコマンドを使用することはできません。")
                 e.isCancelled = true
@@ -386,7 +387,7 @@ class HackReport : JavaPlugin(), Listener {
         }
 
         fun sendMessage(e: PlayerCommandPreprocessEvent, message: String?) {
-            val args = e.message.split("\\s+").toTypedArray()
+            val args = e.message.split("\\s+".toRegex()).toTypedArray()
             val list = CollectionList(*args)
             list.shift()
             list.shift()
