@@ -24,6 +24,9 @@ commands:
     description: "Ignore specific player's chat"
   mute:
     description: "Mute a player."
+  amute:
+    description: "Mute a player, but anonymously."
+    aliases: ["muteanonymous", "anonymousmute"]
   opchat:
     aliases: "oc"
     permission: hackreport.opchat

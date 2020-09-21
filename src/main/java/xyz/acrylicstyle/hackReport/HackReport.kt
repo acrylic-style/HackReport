@@ -27,6 +27,7 @@ import util.CollectionList
 import util.CollectionSet
 import util.Watchdog
 import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.hackReport.commands.AMuteCommand
 import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
 import xyz.acrylicstyle.hackReport.commands.HackReportCommand
 import xyz.acrylicstyle.hackReport.commands.IgnoreCommand
@@ -106,7 +107,8 @@ class HackReport : JavaPlugin(), Listener {
             preloadClass("xyz.acrylicstyle.hackReport.commands.ReportsCommand")
             preloadClass("xyz.acrylicstyle.hackReport.commands.VanishCommand")
             preloadClass("xyz.acrylicstyle.hackReport.commands.WarnCommand")
-            preloadClass("xyz.acrylicstyle.hackReport.commands.MuteList")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.AMuteCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.struct.MuteList")
             val end = System.currentTimeMillis()
             Log.info("Loaded classes in ${end - start}ms")
         }.start()
@@ -146,6 +148,7 @@ class HackReport : JavaPlugin(), Listener {
         TomeitoAPI.registerCommand("reports", ReportsCommand())
         TomeitoAPI.registerCommand("ignore", IgnoreCommand())
         TomeitoAPI.registerCommand("mute", MuteCommand())
+        TomeitoAPI.registerCommand("amute", AMuteCommand())
         TomeitoAPI.registerCommand("opchat", OpChatCommand())
         TomeitoAPI.registerCommand("modchat", ModChatCommand())
         TomeitoAPI.registerCommand("commandlog", CommandLogCommand())
