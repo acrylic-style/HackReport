@@ -218,14 +218,25 @@ class HackReport : JavaPlugin(), Listener {
             e.player.sendMessage("")
             e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
         }
-        muteList.get(e.player.uniqueId).then { // remove mute when it expires
+        muteList.get(e.player.uniqueId, false).then { // remove mute when it expires
             if (it == null) return@then
             if (it.expiresAt == -1L) return@then
             if (System.currentTimeMillis() > it.expiresAt) {
                 Log.info("Removing mute for ${e.player.name} automatically: mute expired")
-                muteList.remove(e.player.uniqueId)
+                muteList.remove(e.player.uniqueId, false)
                 e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
                 e.player.sendMessage("${ChatColor.GREEN}一定時間が経過したためミュートが自動的に解除されました。")
+                e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
+            }
+        }.queue()
+        muteList.get(e.player.uniqueId, true).then {
+            if (it == null) return@then
+            if (it.expiresAt == -1L) return@then
+            if (System.currentTimeMillis() > it.expiresAt) {
+                Log.info("Removing tell mute for ${e.player.name} automatically: expired")
+                muteList.remove(e.player.uniqueId, true)
+                e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
+                e.player.sendMessage("${ChatColor.GREEN}一定時間が経過したためTellミュートが自動的に解除されました。")
                 e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
             }
         }.queue()
@@ -269,12 +280,12 @@ class HackReport : JavaPlugin(), Listener {
             || e.message.startsWith("/lunachat:message ")) {
             val p = e.message.split("\\s+".toRegex()).toTypedArray()[1]
             val player = Bukkit.getPlayer(p) ?: return
-            if (IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId)) {
+            if (IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId) || muteList.contains(e.player.uniqueId, true)) {
                 e.player.sendMessage(ChatColor.RED.toString() + "このプレイヤーにプライベートメッセージを送信することはできません。")
                 e.isCancelled = true
             }
         } else if (e.message.startsWith("/me ") || e.message.startsWith("/g ") || e.message.split("\\s+".toRegex()).toTypedArray()[0].endsWith(":g")) {
-            if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId))) {
+            if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId, false))) {
                 e.player.sendMessage(ChatColor.RED.toString() + "このコマンドを使用することはできません。")
                 e.isCancelled = true
             }
@@ -303,7 +314,7 @@ class HackReport : JavaPlugin(), Listener {
             return
         }
         if (e.player.isOp) return
-        if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId))) {
+        if (muteAll || (ConnectionHolder.ready && muteList.contains(e.player.uniqueId, false))) {
             e.recipients.clear()
             return
         }

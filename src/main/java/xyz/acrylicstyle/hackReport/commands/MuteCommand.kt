@@ -26,6 +26,17 @@ class MuteCommand : CommandExecutor {
                 player.sendMessage("${ChatColor.RED}/mute <Player> [<time> <m/h/d>] [reason] ${ChatColor.GRAY}- ${ChatColor.AQUA}プレイヤーをミュート/ミュート解除します。")
                 return@t
             }
+            mute(player, args, false)
+        }.start()
+        return true
+    }
+
+    companion object {
+        const val DAY: Long = 86_400_000
+        const val HOUR: Long = 3_600_000
+        const val MINUTE: Long =  60_000
+
+        fun mute(player: CommandSender, args: Array<String>, tell: Boolean) {
             val ps = args[0]
             val arg: CollectionList<String>
             run {
@@ -41,7 +52,7 @@ class MuteCommand : CommandExecutor {
                 }
                 arg = list.clone()
             }
-            val uuid = IgnoreCommand.getUniqueId(arg.shift(), player) ?: return@t
+            val uuid = IgnoreCommand.getUniqueId(arg.shift(), player) ?: return
             val d7 = System.currentTimeMillis() + 7 * DAY
             var expiresAt = -1L
             if (arg.size >= 3) {
@@ -58,15 +69,18 @@ class MuteCommand : CommandExecutor {
             if (expiresAt == -1L) expiresAt = d7
             val reason = arg.join(" ")
             val emptyReason = arg.isEmpty()
-            if (muteList.contains(uuid)) {
-                muteList.remove(uuid)
-                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player -> p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f) })
-                Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が" + ps + "のミュートを解除しました" + if (emptyReason) "。" else ": $reason")
-                Webhook.sendWebhook("`${player.name}`が`${ps}`のミュートを解除しました。", "理由: $reason", Color.GREEN)
+            if (muteList.contains(uuid, tell)) {
+                muteList.remove(uuid, tell)
+                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player ->
+                    p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f)
+                    if (tell) p.sendMessage("${ChatColor.GREEN}${player.name}が" + ps + "のTellミュートを解除しました" + if (emptyReason) "。" else ": $reason")
+                })
+                if (!tell) Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が" + ps + "のミュートを解除しました" + if (emptyReason) "。" else ": $reason")
+                Webhook.sendWebhook("`${player.name}`が`${ps}`の${if (tell) "Tell" else ""}ミュートを解除しました。", "理由: $reason", Color.GREEN)
             } else {
                 if (emptyReason) {
                     player.sendMessage("${ChatColor.RED}理由を指定してください。")
-                    return@t
+                    return
                 }
                 muteList.add(
                     Mute(
@@ -76,19 +90,16 @@ class MuteCommand : CommandExecutor {
                         if (player is Player) player.uniqueId else null,
                         System.currentTimeMillis(),
                         expiresAt,
-                    )
+                    ),
+                    tell
                 )
-                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player -> p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f) })
-                Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が${ps}をミュートしました: $reason")
-                Webhook.sendWebhook("`${player.name}`が`${ps}`をミュートしました。", "理由: $reason", Color.RED)
+                TomeitoAPI.getOnlineOperators().forEach(Consumer { p: Player ->
+                    p.playSound(p.location, Sound.BLOCK_NOTE_PLING, 100f, 1f)
+                    if (tell) p.sendMessage("${ChatColor.GREEN}${player.name}が${ps}をTellミュートしました: $reason")
+                })
+                if (!tell) Bukkit.broadcastMessage("${ChatColor.GREEN}${player.name}が${ps}をミュートしました: $reason")
+                Webhook.sendWebhook("`${player.name}`が`${ps}`を${if (tell) "Tell" else ""}ミュートしました。", "理由: $reason", Color.RED)
             }
-        }.start()
-        return true
-    }
-
-    companion object {
-        const val DAY: Long = 86_400_000
-        const val HOUR: Long = 3_600_000
-        const val MINUTE: Long =  60_000
+        }
     }
 }

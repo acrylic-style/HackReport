@@ -4,6 +4,7 @@ import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import util.ArgumentParser
 import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
 import xyz.acrylicstyle.hackReport.utils.Utils
 import xyz.acrylicstyle.shared.BaseMojangAPI
@@ -12,15 +13,17 @@ class LookupMuteCommand: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         Thread t@ {
             if (xyz.acrylicstyle.joinChecker.utils.Utils.modCheck(sender)) return@t
-            if (args.isEmpty()) {
-                sender.sendMessage("${ChatColor.RED}プレイヤーを指定してください。")
+            val parser = ArgumentParser(args.joinToString(" "))
+            if (parser.arguments.isEmpty()) {
+                sender.sendMessage("${ChatColor.RED}プレイヤーを指定してください。(/lookupmute <player> [--tell=true/false])")
                 return@t
             }
-            val uuid = try { BaseMojangAPI.getUniqueId(args[0]) } catch (e: RuntimeException) {
+            val uuid = try { BaseMojangAPI.getUniqueId(parser.arguments[0]) } catch (e: RuntimeException) {
                 sender.sendMessage("${ChatColor.RED}プレイヤーが見つかりません。")
                 return@t
             }
-            muteList.get(uuid).then {
+            val tell = parser.getBoolean("tell")
+            muteList.get(uuid, tell).then {
                 if (it == null) {
                     sender.sendMessage("${ChatColor.GREEN}${args[0]}はミュートされていません。")
                     return@then

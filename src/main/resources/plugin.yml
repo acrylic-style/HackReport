@@ -45,11 +45,13 @@ commands:
   playerchecker:
     description: "Gives player a player checker item"
   mutelist:
-    permission: hackreport.mutelist
+    description: "lists the players who was muted"
   "/vanish":
     permission: hackreport.vanish
   lookupmute:
     description: ""
+  mutetell:
+    aliases: ['mutell']
 permissions:
   hackreport.report:
     description: "allows /report"

@@ -36,6 +36,14 @@ class ConnectionHolder(host: String, name: String, username: String, password: S
                 TableDefinition.Builder("executor", DataType.STRING).build(),
                 TableDefinition.Builder("expiresAt", DataType.BIGINT).build(),
                 TableDefinition.Builder("timestamp", DataType.BIGINT).build(),
+            )),
+            define("tellMute", arrayOf(
+                TableDefinition.Builder("uuid", DataType.STRING).setPrimaryKey(true).setAllowNull(false).build(),
+                TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("reason", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("executor", DataType.STRING).build(),
+                TableDefinition.Builder("expiresAt", DataType.BIGINT).build(),
+                TableDefinition.Builder("timestamp", DataType.BIGINT).build(),
             ))
         )
         sync()

@@ -11,24 +11,25 @@ import java.util.UUID
 import java.util.function.Consumer
 import java.util.function.Function
 
-class MuteList(private val t: Table) {
+class MuteList(private val t: Table, private val t2: Table) {
     companion object {
         private val cache = Collection<UUID, DataCache<Boolean>>()
+        private val tellCache = Collection<UUID, DataCache<Boolean>>()
     }
 
-    fun contains(element: UUID): Boolean {
-        cache[element]?.let {
+    fun contains(element: UUID, tell: Boolean): Boolean {
+        (if (tell) tellCache else cache)[element]?.let {
             val bool = it.get()
             if (bool != null) return bool
         }
-        return t.findOne(FindOptions.Builder().addWhere("uuid", element.toString()).build()).then {
+        return (if (tell) t2 else t).findOne(FindOptions.Builder().addWhere("uuid", element.toString()).build()).then {
             val bool = it != null
-            cache.add(element, DataCache(bool, System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
+            (if (tell) tellCache else cache).add(element, DataCache(bool, System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
             return@then bool
         }.complete()
     }
 
-    fun get(uuid: UUID): Promise<Mute?> = t.findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).build()).then {
+    fun get(uuid: UUID, tell: Boolean): Promise<Mute?> = (if (tell) t2 else t).findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).build()).then {
         if (it == null) return@then null
         val executor = it.getString("executor")
         return@then Mute(
@@ -46,9 +47,9 @@ class MuteList(private val t: Table) {
         return@then it.getString("name")
     }
 
-    fun add(mute: Mute) {
-        cache.remove(mute.uuid)
-        t.insert(
+    fun add(mute: Mute, tell: Boolean) {
+        (if (tell) tellCache else cache).remove(mute.uuid)
+        (if (tell) t2 else t).insert(
             InsertOptions.Builder()
                 .addValue("uuid", mute.uuid.toString())
                 .addValue("name", mute.name)
@@ -60,20 +61,20 @@ class MuteList(private val t: Table) {
         ).queue()
     }
 
-    fun clear() {
+    fun clearCache() {
+        tellCache.clear()
         cache.clear()
-        t.delete(FindOptions.Builder().addWhere("true", true).build()).queue()
     }
 
-    fun remove(element: UUID): Boolean {
-        cache.remove(element)
-        t.delete(FindOptions.Builder().addWhere("uuid", "\"${element}\"").build()).queue()
+    fun remove(element: UUID, tell: Boolean): Boolean {
+        (if (tell) tellCache else cache).remove(element)
+        (if (tell) t2 else t).delete(FindOptions.Builder().addWhere("uuid", element.toString()).build()).queue()
         return true
     }
 
-    fun toMap(): Collection<UUID, String> {
+    fun toMap(tell: Boolean): Collection<UUID, String> {
         val map: Collection<UUID, String> = Collection()
-        this.forEach {
+        this.forEach(tell) {
             val uuid = UUID.fromString(it.getString("uuid"))
             val name = it.getString("name")
             map.add(uuid, name)
@@ -81,9 +82,9 @@ class MuteList(private val t: Table) {
         return map
     }
 
-    fun filter(filter: Function<UUID, Boolean>): Collection<UUID, String> {
+    fun filter(filter: Function<UUID, Boolean>, tell: Boolean): Collection<UUID, String> {
         val map: Collection<UUID, String> = Collection()
-        this.forEach {
+        this.forEach(tell) {
             val uuid = UUID.fromString(it.getString("uuid"))
             val name = it.getString("name")
             if (filter.apply(uuid)) {
@@ -93,7 +94,7 @@ class MuteList(private val t: Table) {
         return map
     }
 
-    fun forEach(action: Consumer<in TableData>) {
-        t.findAll(null).complete().forEach { action.accept(it) }
+    fun forEach(tell: Boolean, action: Consumer<in TableData>) {
+        (if (tell) t2 else t).findAll(null).complete().forEach { action.accept(it) }
     }
 }
