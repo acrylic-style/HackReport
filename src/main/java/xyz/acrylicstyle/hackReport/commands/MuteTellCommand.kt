@@ -14,7 +14,7 @@ class MuteTellCommand : CommandExecutor {
                 player.sendMessage("${ChatColor.RED}/mutetell <Player> [<time> <m/h/d>] [reason] ${ChatColor.GRAY}- ${ChatColor.AQUA}プレイヤーのTellをミュート/ミュート解除します。")
                 return@t
             }
-            MuteCommand.mute(player, args, false)
+            MuteCommand.mute(player, args, true)
         }.start()
         return true
     }
