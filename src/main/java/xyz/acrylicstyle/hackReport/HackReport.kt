@@ -36,6 +36,7 @@ import xyz.acrylicstyle.hackReport.commands.ModChatCommand
 import xyz.acrylicstyle.hackReport.commands.MuteAllCommand
 import xyz.acrylicstyle.hackReport.commands.MuteCommand
 import xyz.acrylicstyle.hackReport.commands.MuteListCommand
+import xyz.acrylicstyle.hackReport.commands.MuteTellCommand
 import xyz.acrylicstyle.hackReport.commands.NameChangesCommand
 import xyz.acrylicstyle.hackReport.commands.OpChatCommand
 import xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand
@@ -149,6 +150,7 @@ class HackReport : JavaPlugin(), Listener {
         TomeitoAPI.registerCommand("ignore", IgnoreCommand())
         TomeitoAPI.registerCommand("mute", MuteCommand())
         TomeitoAPI.registerCommand("amute", AMuteCommand())
+        TomeitoAPI.registerCommand("mutetell", MuteTellCommand())
         TomeitoAPI.registerCommand("opchat", OpChatCommand())
         TomeitoAPI.registerCommand("modchat", ModChatCommand())
         TomeitoAPI.registerCommand("commandlog", CommandLogCommand())
