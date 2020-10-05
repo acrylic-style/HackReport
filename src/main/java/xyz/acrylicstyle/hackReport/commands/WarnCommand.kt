@@ -39,7 +39,7 @@ class WarnCommand : CommandExecutor {
             val webhook = webhook ?: return@label
             Thread {
                 webhook.addEmbed(
-                    Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`を警告しました。"; description = "理由: " + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', list.join(" "))); color = Color.YELLOW }
+                    Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[0]}`を警告しました。"; description = "理由: " + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', list.join(" "))); color = Color.YELLOW }
                 )
                 try {
                     webhook.execute()
