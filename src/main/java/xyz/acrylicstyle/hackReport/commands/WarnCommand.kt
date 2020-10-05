@@ -7,7 +7,11 @@ import org.bukkit.command.CommandSender
 import util.ICollectionList
 import xyz.acrylicstyle.api.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport
+import xyz.acrylicstyle.hackReport.utils.Utils.webhook
+import xyz.acrylicstyle.hackReport.utils.Webhook
 import xyz.acrylicstyle.joinChecker.utils.Utils
+import java.awt.Color
+import java.io.IOException
 
 class WarnCommand : CommandExecutor {
     override fun onCommand(player: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
@@ -32,6 +36,17 @@ class WarnCommand : CommandExecutor {
             HackReport.warnQueue.add(uuid, ChatColor.translateAlternateColorCodes('&', list.join(" ")))
             player.sendMessage(ChatColor.GREEN.toString() + "プレイヤーを警告しました: " + list.join(" "))
             player.sendMessage(ChatColor.GRAY.toString() + "プレイヤーがオフラインの場合は次回参加時に警告されます。")
+            val webhook = webhook ?: return@label
+            Thread {
+                webhook.addEmbed(
+                    Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`を警告しました。"; description = "理由: " + ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', list.join(" "))); color = Color.YELLOW }
+                )
+                try {
+                    webhook.execute()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }.start()
         }.start()
         return true
     }

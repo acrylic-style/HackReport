@@ -9,12 +9,8 @@ import util.ICollection
 import util.StringCollection
 import xyz.acrylicstyle.api.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
-import xyz.acrylicstyle.hackReport.utils.Utils.webhook
-import xyz.acrylicstyle.hackReport.utils.Webhook
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider
-import java.awt.Color
-import java.io.IOException
 import java.util.HashMap
 import java.util.UUID
 
@@ -38,17 +34,6 @@ class IgnoreCommand : PlayerCommandExecutor() {
                     collection.add(uuid.toString(), args[1])
                     saveIgnoreListPlayer(player.uniqueId, collection)
                     player.sendMessage("${ChatColor.GREEN}Ignoreリストに" + args[1] + "を追加しました。")
-                    val webhook = webhook ?: return
-                    Thread {
-                        webhook.addEmbed(
-                            Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`をIgnoreリストに追加しました。"; color = Color.YELLOW }
-                        )
-                        try {
-                            webhook.execute()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                    }.start()
                 } else if (args[0].equals("remove", ignoreCase = true)) {
                     if (args.size == 1) {
                         player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
@@ -63,17 +48,6 @@ class IgnoreCommand : PlayerCommandExecutor() {
                     }
                     saveIgnoreListPlayer(player.uniqueId, collection)
                     player.sendMessage("${ChatColor.GREEN}Ignoreリストから" + args[1] + "を削除しました。")
-                    val webhook = webhook ?: return
-                    Thread {
-                        webhook.addEmbed(
-                            Webhook.EmbedObject().apply { title = "`${player.name}`が`${args[1]}`をIgnoreリストから削除しました。"; color = Color.YELLOW }
-                        )
-                        try {
-                            webhook.execute()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                    }.start()
                 } else if (args[0].equals("list", ignoreCase = true)) {
                     player.sendMessage("${ChatColor.GREEN}Ignoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.uniqueId).valuesList().join("${ChatColor.GRAY}, ${ChatColor.YELLOW}"))
                 } else {
