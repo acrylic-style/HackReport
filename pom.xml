@@ -112,7 +112,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>tomeito_plugin</artifactId>
-            <version>0.5.19</version>
+            <version>0.5.19a</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -140,7 +140,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>sequelize4j</artifactId>
-            <version>0.3.3</version>
+            <version>0.3.4a</version>
         </dependency>
     </dependencies>
 </project>
