@@ -26,7 +26,7 @@ import util.Collection
 import util.CollectionList
 import util.CollectionSet
 import util.Watchdog
-import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.commands.AMuteCommand
 import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
 import xyz.acrylicstyle.hackReport.commands.HackReportCommand

@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 import util.ICollection
 import util.StringCollection
-import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider

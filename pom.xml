@@ -111,8 +111,8 @@
         </dependency>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>tomeito_plugin</artifactId>
-            <version>0.5.19a</version>
+            <artifactId>api</artifactId>
+            <version>0.5.22a</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -5,7 +5,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import util.ICollectionList
-import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport
 import xyz.acrylicstyle.hackReport.utils.Utils.webhook
 import xyz.acrylicstyle.hackReport.utils.Webhook

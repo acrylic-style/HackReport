@@ -6,7 +6,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitRunnable
 import util.CollectionList
-import xyz.acrylicstyle.api.MojangAPI
+import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
 import xyz.acrylicstyle.joinChecker.utils.Utils
 import xyz.acrylicstyle.shared.NameHistory
