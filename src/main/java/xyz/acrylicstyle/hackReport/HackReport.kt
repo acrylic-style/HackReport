@@ -361,6 +361,7 @@ class HackReport : JavaPlugin(), Listener {
     @EventHandler
     fun onPlayerInteract(e: PlayerInteractEvent) {
         if (e.action != Action.LEFT_CLICK_BLOCK && (e.getHand() == null || e.getHand() == EquipmentSlot.HAND)) {
+            if (!cps.containsKey(e.player.uniqueId)) cps[e.player.uniqueId] = AtomicInteger()
             cps[e.player.uniqueId]!!.incrementAndGet()
             Bukkit.getScheduler().runTaskLater(this, {
                 cps[e.player.uniqueId]!!.decrementAndGet()
