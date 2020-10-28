@@ -215,6 +215,7 @@ class HackReport : JavaPlugin(), Listener {
                         stopWatching(player)
                         return@forEach
                     }
+                    if (!cps.containsKey(target.uniqueId)) cps[target.uniqueId] = AtomicInteger()
                     player.sendActionbar("${ChatColor.GOLD}${target.name} ${ChatColor.WHITE}| ${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}ms ${ChatColor.WHITE}| ${ChatColor.GREEN}CPS: ${cps[target.uniqueId]!!.get()}")
                 }
             }
@@ -361,6 +362,9 @@ class HackReport : JavaPlugin(), Listener {
     fun onPlayerInteract(e: PlayerInteractEvent) {
         if (e.action != Action.LEFT_CLICK_BLOCK && (e.getHand() == null || e.getHand() == EquipmentSlot.HAND)) {
             cps[e.player.uniqueId]!!.incrementAndGet()
+            Bukkit.getScheduler().runTaskLater(this, {
+                cps[e.player.uniqueId]!!.decrementAndGet()
+            }, 20L)
         }
         if (e.action != Action.RIGHT_CLICK_AIR && e.action != Action.RIGHT_CLICK_BLOCK) return
         if (e.item == null || !e.item.isSimilar(PlayerCheckerCommand.ITEM)) return
