@@ -210,6 +210,10 @@ class HackReport : JavaPlugin(), Listener {
         object : BukkitRunnable() {
             override fun run() {
                 watchingPlayers.forEach { player, target ->
+                    if (!player.isOnline) {
+                        stopWatching(player)
+                        return@forEach
+                    }
                     if (!target.isOnline) {
                         player.sendActionbar("${ChatColor.GOLD}プレイヤーがオフラインになりました")
                         stopWatching(player)
