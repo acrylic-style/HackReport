@@ -72,7 +72,7 @@ class PlayerActionGui : InventoryHolder, Listener {
                 ChatColor.GOLD.toString() + "体力: " + ChatColor.RED + (player.health * 100).roundToInt() / 100f,
                 ChatColor.GOLD.toString() + "食料レベル: " + ChatColor.RED + player.foodLevel,
                 ChatColor.GOLD.toString() + "浮遊可能: " + ChatColor.RED + if (player.allowFlight) "はい" else "いいえ",
-                ChatColor.GOLD.toString() + "浮遊している: " + ChatColor.RED + if (player.isFlying) "はい" else "いいえ"
+                ChatColor.GOLD.toString() + "浮遊している: " + ChatColor.RED + if (player.isFlying) "はい" else "いいえ",
             )
             info.itemMeta = infoMeta
             val ban = ItemStack(Material.WOOL, 1, 5.toShort())

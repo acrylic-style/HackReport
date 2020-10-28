@@ -5,7 +5,7 @@ import org.bukkit.entity.Player
 import java.util.UUID
 
 class HackReportPlayer(val uniqueId: UUID) {
-    val player: Player?
+    val player: Player? = Bukkit.getPlayer(uniqueId)
     val isOnline: Boolean
         get() = player != null && player.isOnline
     val health: Double
@@ -17,7 +17,4 @@ class HackReportPlayer(val uniqueId: UUID) {
     val allowFlight: Boolean
         get() = player != null && player.allowFlight
 
-    init {
-        player = Bukkit.getPlayer(uniqueId)
-    }
 }

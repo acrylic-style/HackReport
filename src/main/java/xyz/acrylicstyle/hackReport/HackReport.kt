@@ -1,6 +1,9 @@
 package xyz.acrylicstyle.hackReport
 
 import net.luckperms.api.LuckPerms
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.BaseComponent
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -25,8 +28,11 @@ import org.bukkit.scheduler.BukkitRunnable
 import util.Collection
 import util.CollectionList
 import util.CollectionSet
+import util.ReflectionHelper
 import util.Watchdog
+import util.reflect.Ref
 import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
+import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils
 import xyz.acrylicstyle.hackReport.commands.AMuteCommand
 import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
 import xyz.acrylicstyle.hackReport.commands.HackReportCommand
@@ -43,20 +49,26 @@ import xyz.acrylicstyle.hackReport.commands.PlayerCheckerCommand
 import xyz.acrylicstyle.hackReport.commands.PlayerCommand
 import xyz.acrylicstyle.hackReport.commands.ReportCommand
 import xyz.acrylicstyle.hackReport.commands.ReportsCommand
+import xyz.acrylicstyle.hackReport.commands.UnwatchCommand
 import xyz.acrylicstyle.hackReport.commands.VanishCommand
 import xyz.acrylicstyle.hackReport.commands.WarnCommand
+import xyz.acrylicstyle.hackReport.commands.WatchCommand
 import xyz.acrylicstyle.hackReport.utils.ConnectionHolder
 import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo
 import xyz.acrylicstyle.hackReport.utils.ReportDetails
+import xyz.acrylicstyle.hackReport.utils.Utils.getPing
 import xyz.acrylicstyle.hackReport.utils.Webhook
+import xyz.acrylicstyle.shared.NMSAPI
 import xyz.acrylicstyle.shared.NameHistory
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI
 import xyz.acrylicstyle.tomeito_api.events.player.EntityDamageByPlayerEvent
 import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider
 import xyz.acrylicstyle.tomeito_api.sounds.Sound
 import xyz.acrylicstyle.tomeito_api.utils.Log
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil
 import java.awt.Color
+import java.lang.reflect.Method
 import java.util.Objects
 import java.util.UUID
 import java.util.function.Consumer
@@ -161,6 +173,8 @@ class HackReport : JavaPlugin(), Listener {
         TomeitoAPI.registerCommand("lookupmute", LookupMuteCommand())
         TomeitoAPI.registerCommand("playerchecker", PlayerCheckerCommand())
         TomeitoAPI.registerCommand("/vanish", VanishCommand())
+        TomeitoAPI.registerCommand("watch", WatchCommand())
+        TomeitoAPI.registerCommand("unwatch", UnwatchCommand())
         Log.info("Registering events")
         Bukkit.getPluginManager().registerEvents(this, this)
         object : BukkitRunnable() {
@@ -186,6 +200,18 @@ class HackReport : JavaPlugin(), Listener {
                 }
             }
         }.runTaskTimerAsynchronously(this, 20, 20)
+        object : BukkitRunnable() {
+            override fun run() {
+                watchingPlayers.forEach { player, target ->
+                    if (!target.isOnline) {
+                        player.sendActionbar("${ChatColor.GOLD}プレイヤーがオフラインになりました")
+                        stopWatching(player)
+                        return@forEach
+                    }
+                    player.sendActionbar("${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt() / 10} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt() / 10} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}")
+                }
+            }
+        }.runTaskTimer(this, 5, 5)
         Log.info("Enabled HackReport")
     }
 
@@ -408,6 +434,42 @@ class HackReport : JavaPlugin(), Listener {
             list.shift()
             list.shift()
             Webhook.sendWebhook(message, "理由: " + list.join(" "), Color.RED)
+        }
+
+        private val watchingPlayers = Collection<Player, Player>()
+
+        @JvmStatic
+        fun startWatching(player: Player, target: Player) {
+            watchingPlayers[player] = target
+        }
+
+        @JvmStatic
+        fun stopWatching(player: Player) = watchingPlayers.remove(player)
+
+        @JvmStatic
+        fun Player.sendActionbar(message: String?) {
+            if (message == null) return
+            var nmsVersion = Bukkit.getServer().javaClass.getPackage().name
+            nmsVersion = nmsVersion.substring(nmsVersion.lastIndexOf(".") + 1)
+            if (!nmsVersion.startsWith("v1_9_R") && !nmsVersion.startsWith("v1_8_R")) {
+                Ref.getClass(Player.Spigot::class.java)
+                    .getMethod("sendMessage", ChatMessageType::class.java, BaseComponent::class.java)
+                    .invoke(this.spigot(), ChatMessageType.ACTION_BAR, TextComponent(message))
+                return
+            }
+            try {
+                val ppoc = ReflectionUtil.getNMSClass("PacketPlayOutChat")
+                val chat = ReflectionUtil.getNMSClass(if (nmsVersion.equals("v1_8_R1", ignoreCase = true)) "ChatSerializer" else "ChatComponentText")
+                val chatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent")
+                var method: Method? = null
+                if (nmsVersion.equals("v1_8_R1", ignoreCase = true)) method = chat.getDeclaredMethod("a", String::class.java)
+                val c = if (nmsVersion.equals("v1_8_R1", ignoreCase = true)) chatBaseComponent.cast(Objects.requireNonNull(method)!!.invoke(chat, "{'text': '$message'}")) else chat.getConstructor(String::class.java).newInstance(message)
+                val packetPlayOutChat = ppoc.getConstructor(chatBaseComponent, java.lang.Byte.TYPE).newInstance(c, 2.toByte())
+                val playerConnection = ReflectionHelper.getFieldWithoutException(NMSAPI.getClassWithoutException("EntityPlayer"), CraftUtils.getHandle(this), "playerConnection")
+                ReflectionHelper.invokeMethodWithoutException(NMSAPI.getClassWithoutException("PlayerConnection"), playerConnection, "sendPacket", packetPlayOutChat)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
         }
     }
 }

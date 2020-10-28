@@ -1,12 +1,16 @@
 package xyz.acrylicstyle.hackReport.utils
 
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import util.CollectionList
+import util.ReflectionHelper
 import xyz.acrylicstyle.hackReport.HackReport
 import xyz.acrylicstyle.hackReport.commands.MuteCommand
+import xyz.acrylicstyle.shared.NMSAPI
+import xyz.acrylicstyle.shared.OBCAPI
 import java.util.Calendar
 import java.util.UUID
 
@@ -67,5 +71,18 @@ object Utils {
             + calendar[Calendar.HOUR_OF_DAY] + ":"
             + (if (m.length == 1) "0$m" else m) + ":"
             + if (s.length == 1) "0$s" else s)
+    }
+
+    fun Player.getPing(): String {
+        val ep = ReflectionHelper.invokeMethodWithoutException(OBCAPI.getClassWithoutException("entity.CraftPlayer"), player, "getHandle")
+        val ping = ReflectionHelper.getFieldWithoutException(NMSAPI.getClassWithoutException("EntityPlayer"), ep, "ping") as Int
+        return when {
+            ping <= 5 -> "" + ChatColor.LIGHT_PURPLE + ping
+            ping <= 50 -> "" + ChatColor.GREEN + ping
+            ping <= 150 -> "" + ChatColor.YELLOW + ping
+            ping <= 250 -> "" + ChatColor.GOLD + ping
+            ping <= 350 -> "" + ChatColor.RED + ping
+            else -> "" + ChatColor.DARK_RED + ping
+        }
     }
 }

@@ -52,6 +52,10 @@ commands:
     description: ""
   mutetell:
     aliases: ['mutell']
+  watch:
+    description: "Watches player"
+  unwatch:
+    description: "Unwatches player"
 permissions:
   hackreport.report:
     description: "allows /report"
