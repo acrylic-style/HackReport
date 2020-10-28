@@ -4,9 +4,12 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import util.CollectionList
 import util.ReflectionHelper
+import util.reflect.Ref
 import xyz.acrylicstyle.hackReport.HackReport
 import xyz.acrylicstyle.hackReport.commands.MuteCommand
 import xyz.acrylicstyle.shared.NMSAPI
@@ -84,5 +87,15 @@ object Utils {
             ping <= 350 -> "" + ChatColor.RED + ping
             else -> "" + ChatColor.DARK_RED + ping
         }
+    }
+
+    private fun checkPlayerInteractEvent_getHand(): Boolean {
+        return ReflectionHelper.findMethod(PlayerInteractEvent::class.java, "getHand") != null
+    }
+
+    fun PlayerInteractEvent.getHand(): EquipmentSlot? {
+        return if (checkPlayerInteractEvent_getHand()) {
+            Ref.getMethod(PlayerInteractEvent::class.java, "getHand").invoke(this) as EquipmentSlot
+        } else null
     }
 }

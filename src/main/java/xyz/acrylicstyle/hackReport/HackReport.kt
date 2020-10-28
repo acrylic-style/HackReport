@@ -20,6 +20,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.plugin.java.JavaPlugin
@@ -57,8 +58,10 @@ import xyz.acrylicstyle.hackReport.utils.ConnectionHolder
 import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
 import xyz.acrylicstyle.hackReport.utils.PlayerInfo
 import xyz.acrylicstyle.hackReport.utils.ReportDetails
+import xyz.acrylicstyle.hackReport.utils.Utils.getHand
 import xyz.acrylicstyle.hackReport.utils.Utils.getPing
 import xyz.acrylicstyle.hackReport.utils.Webhook
+import xyz.acrylicstyle.minecraft.v1_8_R1.Packet
 import xyz.acrylicstyle.shared.NMSAPI
 import xyz.acrylicstyle.shared.NameHistory
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI
@@ -71,12 +74,15 @@ import java.awt.Color
 import java.lang.reflect.Method
 import java.util.Objects
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.stream.Collectors
 import kotlin.math.roundToInt
 
 class HackReport : JavaPlugin(), Listener {
+    private val cps = Collection<UUID, AtomicInteger>()
+
     override fun onLoad() {
         instance = this
         Thread {
@@ -86,6 +92,7 @@ class HackReport : JavaPlugin(), Listener {
             preloadClass("xyz.acrylicstyle.hackReport.HackReport$2")
             preloadClass("xyz.acrylicstyle.hackReport.HackReport$3")
             preloadClass("xyz.acrylicstyle.hackReport.HackReport\$onDisable\$1")
+            preloadClass("xyz.acrylicstyle.hackReport.HackReport\$onDisable\$2")
             preloadClass("xyz.acrylicstyle.hackReport.utils.Utils")
             preloadClass("xyz.acrylicstyle.hackReport.utils.ReportDetails")
             preloadClass("xyz.acrylicstyle.hackReport.utils.Webhook")
@@ -208,16 +215,17 @@ class HackReport : JavaPlugin(), Listener {
                         stopWatching(player)
                         return@forEach
                     }
-                    player.sendActionbar("${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt() / 10} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt() / 10} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}")
+                    player.sendActionbar("${ChatColor.GOLD}${target.name} ${ChatColor.WHITE}| ${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}ms ${ChatColor.WHITE}| ${ChatColor.GREEN}CPS: ${cps[target.uniqueId]!!.get()}")
                 }
             }
-        }.runTaskTimer(this, 5, 5)
+        }.runTaskTimer(this, 1, 1)
         Log.info("Enabled HackReport")
     }
 
     @Suppress("UNCHECKED_CAST")
     @EventHandler
     fun onPlayerJoin(e: PlayerJoinEvent) {
+        if (!cps.containsKey(e.player.uniqueId)) cps[e.player.uniqueId] = AtomicInteger()
         vanishedPlayers.map(Function { id: UUID? -> Bukkit.getPlayer(id) } as Function<UUID?, Player>).filter { obj: Player? -> Objects.nonNull(obj) }.filter { p: Player -> p.uniqueId != e.player.uniqueId }.forEach(Consumer { player: Player? -> e.player.hidePlayer(player) })
         if (vanishedPlayers.contains(e.player.uniqueId)) {
             Bukkit.getOnlinePlayers().forEach { p: Player -> p.hidePlayer(e.player) }
@@ -351,6 +359,9 @@ class HackReport : JavaPlugin(), Listener {
 
     @EventHandler
     fun onPlayerInteract(e: PlayerInteractEvent) {
+        if (e.action != Action.LEFT_CLICK_BLOCK && (e.getHand() == null || e.getHand() == EquipmentSlot.HAND)) {
+            cps[e.player.uniqueId]!!.incrementAndGet()
+        }
         if (e.action != Action.RIGHT_CLICK_AIR && e.action != Action.RIGHT_CLICK_BLOCK) return
         if (e.item == null || !e.item.isSimilar(PlayerCheckerCommand.ITEM)) return
         e.setUseItemInHand(Event.Result.DENY)
@@ -446,6 +457,7 @@ class HackReport : JavaPlugin(), Listener {
         @JvmStatic
         fun stopWatching(player: Player) = watchingPlayers.remove(player)
 
+        @Suppress("DEPRECATION")
         @JvmStatic
         fun Player.sendActionbar(message: String?) {
             if (message == null) return
@@ -466,7 +478,7 @@ class HackReport : JavaPlugin(), Listener {
                 val c = if (nmsVersion.equals("v1_8_R1", ignoreCase = true)) chatBaseComponent.cast(Objects.requireNonNull(method)!!.invoke(chat, "{'text': '$message'}")) else chat.getConstructor(String::class.java).newInstance(message)
                 val packetPlayOutChat = ppoc.getConstructor(chatBaseComponent, java.lang.Byte.TYPE).newInstance(c, 2.toByte())
                 val playerConnection = ReflectionHelper.getFieldWithoutException(NMSAPI.getClassWithoutException("EntityPlayer"), CraftUtils.getHandle(this), "playerConnection")
-                ReflectionHelper.invokeMethodWithoutException(NMSAPI.getClassWithoutException("PlayerConnection"), playerConnection, "sendPacket", packetPlayOutChat)
+                Ref.getClass(NMSAPI.getClassWithoutException("PlayerConnection")).getMethod("sendPacket", Packet.CLASS).invokeObj(playerConnection, packetPlayOutChat)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }

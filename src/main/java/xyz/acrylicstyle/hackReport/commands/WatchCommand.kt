@@ -9,6 +9,10 @@ import xyz.acrylicstyle.tomeito_api.command.PlayerOpCommandExecutor
 
 class WatchCommand : PlayerOpCommandExecutor() {
     override fun onCommand(player: Player, args: Array<String>) {
+        if (args.isEmpty()) {
+            player.sendMessage("${ChatColor.RED}プレイヤーを指定してください。")
+            return
+        }
         val target = Bukkit.getPlayerExact(args[0])
         if (target == null) {
             player.sendMessage(ChatColor.RED.toString() + "プレイヤー'" + args[0] + "'が見つかりません。")
