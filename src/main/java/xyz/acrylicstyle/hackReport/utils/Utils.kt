@@ -95,7 +95,7 @@ object Utils {
 
     fun PlayerInteractEvent.getHand(): EquipmentSlot? {
         return if (checkPlayerInteractEvent_getHand()) {
-            Ref.getMethod(PlayerInteractEvent::class.java, "getHand").invoke(this) as EquipmentSlot
+            Ref.getMethod(PlayerInteractEvent::class.java, "getHand").invoke(this) as EquipmentSlot?
         } else null
     }
 }
