@@ -259,6 +259,9 @@ class HackReport : JavaPlugin(), Listener {
             e.player.sendMessage("")
             e.player.sendMessage(ChatColor.GOLD.toString() + "==============================")
         }
+        if (!ConnectionHolder.ready) {
+            return Log.warn("Skipping mute check because database is unavailable")
+        }
         muteList.get(e.player.uniqueId, false).then { // remove mute when it expires
             if (it == null) return@then
             if (it.expiresAt == -1L) return@then
