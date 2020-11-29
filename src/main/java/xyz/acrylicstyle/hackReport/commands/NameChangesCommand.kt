@@ -6,9 +6,9 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitRunnable
 import util.CollectionList
-import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
 import xyz.acrylicstyle.joinChecker.utils.Utils
+import xyz.acrylicstyle.shared.BaseMojangAPI
 import xyz.acrylicstyle.shared.NameHistory
 import java.util.Calendar
 import java.util.function.Consumer
@@ -18,13 +18,13 @@ class NameChangesCommand : CommandExecutor {
         object : BukkitRunnable() {
             override fun run() {
                 if (Utils.modCheck(sender)) return
-                val uuid = MojangAPI.getUniqueId(args[0])
+                val uuid = BaseMojangAPI.getUniqueId(args[0])
                 if (uuid == null) {
                     sender.sendMessage(ChatColor.RED.toString() + "プレイヤーが見つかりません。")
                     return
                 }
                 val list = CollectionList<String>()
-                MojangAPI.getNameChanges(uuid).reverse().foreach { history: NameHistory, index: Int ->
+                BaseMojangAPI.getNameChanges(uuid).reverse().foreach { history: NameHistory, index: Int ->
                     var date = ""
                     if (history.changedToAt != null) {
                         val cal = Calendar.getInstance()

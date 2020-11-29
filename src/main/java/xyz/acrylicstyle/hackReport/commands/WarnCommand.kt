@@ -5,11 +5,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import util.ICollectionList
-import xyz.acrylicstyle.api.v1_8_R1.MojangAPI
 import xyz.acrylicstyle.hackReport.HackReport
 import xyz.acrylicstyle.hackReport.utils.Utils.webhook
 import xyz.acrylicstyle.hackReport.utils.Webhook
 import xyz.acrylicstyle.joinChecker.utils.Utils
+import xyz.acrylicstyle.shared.BaseMojangAPI
 import java.awt.Color
 import java.io.IOException
 
@@ -21,7 +21,7 @@ class WarnCommand : CommandExecutor {
                 player.sendMessage(ChatColor.RED.toString() + "/warn <Player> [理由] " + ChatColor.GRAY + "- " + ChatColor.AQUA + "プレイヤーを警告します。")
                 return@label
             }
-            val uuid = MojangAPI.getUniqueId(args[0])
+            val uuid = BaseMojangAPI.getUniqueId(args[0])
             if (uuid == null) {
                 player.sendMessage(ChatColor.RED.toString() + "プレイヤーが見つかりません。")
                 return@label
