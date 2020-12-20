@@ -172,7 +172,7 @@ class HackReport : JavaPlugin(), Listener {
             }.start()
         }
         Log.info("Registering PacketListener")
-        SimplePacketListenerAPI.addReceivedPacketHandler(handler)
+        SimplePacketListenerAPI.addReceivedPacketHandler(this, handler)
         Log.info("Registering commands")
         TomeitoAPI.registerCommand("hackreport", HackReportCommand())
         TomeitoAPI.registerCommand("player", PlayerCommand())
