@@ -112,7 +112,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.5.22a</version>
+            <version>0.6.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -140,7 +140,13 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>sequelize4j</artifactId>
-            <version>0.3.4a</version>
+            <version>0.3.7a</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>SimplePacketListenerAPI</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -62,6 +62,7 @@ import xyz.acrylicstyle.hackReport.utils.Utils.getHand
 import xyz.acrylicstyle.hackReport.utils.Utils.getPing
 import xyz.acrylicstyle.hackReport.utils.Webhook
 import xyz.acrylicstyle.minecraft.v1_8_R1.Packet
+import xyz.acrylicstyle.packetListener.SimplePacketListenerAPI
 import xyz.acrylicstyle.shared.NMSAPI
 import xyz.acrylicstyle.shared.NameHistory
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI
@@ -70,6 +71,7 @@ import xyz.acrylicstyle.tomeito_api.providers.ConfigProvider
 import xyz.acrylicstyle.tomeito_api.sounds.Sound
 import xyz.acrylicstyle.tomeito_api.utils.Log
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil
+import xyz.acrylicstyle.packetListener.packet.ReceivedPacket
 import java.awt.Color
 import java.lang.reflect.Method
 import java.util.Objects
@@ -81,7 +83,15 @@ import java.util.stream.Collectors
 import kotlin.math.roundToInt
 
 class HackReport : JavaPlugin(), Listener {
+    private val pps = Collection<UUID, AtomicInteger>()
     private val cps = Collection<UUID, AtomicInteger>()
+    private val handler: (ReceivedPacket) -> Unit = { packet: ReceivedPacket ->
+        if (!pps.containsKey(packet.player.uniqueId)) {
+            pps.add(packet.player.uniqueId, AtomicInteger())
+        }
+        pps[packet.player.uniqueId]!!.incrementAndGet()
+        Bukkit.getScheduler().runTaskLater(this, { pps[packet.player.uniqueId]!!.decrementAndGet() }, 20L)
+    }
 
     override fun onLoad() {
         instance = this
@@ -161,6 +171,8 @@ class HackReport : JavaPlugin(), Listener {
                 }
             }.start()
         }
+        Log.info("Registering PacketListener")
+        SimplePacketListenerAPI.addReceivedPacketHandler(handler)
         Log.info("Registering commands")
         TomeitoAPI.registerCommand("hackreport", HackReportCommand())
         TomeitoAPI.registerCommand("player", PlayerCommand())
@@ -220,7 +232,7 @@ class HackReport : JavaPlugin(), Listener {
                         return@forEach
                     }
                     if (!cps.containsKey(target.uniqueId)) cps[target.uniqueId] = AtomicInteger()
-                    player.sendActionbar("${ChatColor.GOLD}${target.name} ${ChatColor.WHITE}| ${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}ms ${ChatColor.WHITE}| ${ChatColor.GREEN}CPS: ${cps[target.uniqueId]!!.get()}")
+                    player.sendActionbar("${ChatColor.GOLD}${target.name} ${ChatColor.WHITE}| ${ChatColor.GREEN}体力: ${(target.health * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}距離: ${(player.location.distance(target.location) * 10).roundToInt().toDouble() / 10.toDouble()} ${ChatColor.WHITE}| ${ChatColor.GREEN}Ping: ${target.getPing()}ms ${ChatColor.WHITE}| ${ChatColor.GREEN}CPS: ${cps[target.uniqueId]!!.get()} ${ChatColor.WHITE}| ${ChatColor.GREEN}PPS: ${pps[target.uniqueId]}")
                 }
             }
         }.runTaskTimer(this, 1, 1)
@@ -287,6 +299,7 @@ class HackReport : JavaPlugin(), Listener {
     }
 
     override fun onDisable() {
+        SimplePacketListenerAPI.removeReceivedPacketHandler(handler)
         Watchdog("HackReport#disable", {
             connection?.close()
         }, 1000 * 10, {
