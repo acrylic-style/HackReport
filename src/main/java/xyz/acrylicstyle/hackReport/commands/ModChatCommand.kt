@@ -3,7 +3,7 @@ package xyz.acrylicstyle.hackReport.commands
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
-import util.Collection
+import util.ICollection
 import util.ICollectionList
 import xyz.acrylicstyle.hackReport.HackReport
 import xyz.acrylicstyle.joinChecker.JoinCheckerManager
@@ -42,7 +42,7 @@ class ModChatCommand : PlayerCommandExecutor() {
         fun Do(name: String, message: String?) {
             JoinCheckerManager.moderators
                 .toMap()
-                .then<Any?> { map: Collection<UUID?, String?> ->
+                .then { map: ICollection<UUID?, String?> ->
                     map.keysList()
                         .map(Function { id: UUID? -> Bukkit.getPlayer(id) } as Function<UUID?, Player>)
                         .filter { obj: Player? -> Objects.nonNull(obj) }

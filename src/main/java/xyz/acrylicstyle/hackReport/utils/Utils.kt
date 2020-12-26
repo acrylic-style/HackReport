@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import util.CollectionList
+import util.ICollectionList
 import util.ReflectionHelper
 import util.reflect.Ref
 import xyz.acrylicstyle.hackReport.HackReport
@@ -26,7 +27,7 @@ object Utils {
             return players
         }
 
-    fun getOnlinePlayers(you: UUID): CollectionList<Player> {
+    fun getOnlinePlayers(you: UUID): ICollectionList<Player> {
         val players = CollectionList<Player>()
         players.addAll(Bukkit.getOnlinePlayers())
         return players.filter { p: Player -> p.uniqueId != you && !p.isOp }

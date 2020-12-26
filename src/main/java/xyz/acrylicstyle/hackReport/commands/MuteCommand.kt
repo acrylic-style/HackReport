@@ -6,7 +6,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import util.CollectionList
 import util.ICollectionList
 import xyz.acrylicstyle.hackReport.struct.Mute
 import xyz.acrylicstyle.hackReport.utils.ConnectionHolder.Companion.muteList
@@ -38,7 +37,7 @@ class MuteCommand : CommandExecutor {
 
         fun mute(player: CommandSender, args: Array<String>, tell: Boolean) {
             val ps = args[0]
-            val arg: CollectionList<String>
+            val arg: ICollectionList<String>
             run {
                 val list = ICollectionList.asList(args) // doing this in block intentionally, to prevent access to "list" from outside of this
                 if (args.size > 1) {
@@ -63,7 +62,7 @@ class MuteCommand : CommandExecutor {
                         "m" -> System.currentTimeMillis() + arg[0].toLong() * MINUTE
                         else -> -1
                     }
-                    if (expiresAt != -1L) arg.shiftChain().shiftChain()
+                    if (expiresAt != -1L) arg.thenShift().thenShift()
                 }
             }
             if (expiresAt == -1L) expiresAt = d7
