@@ -9,7 +9,7 @@
     <version>0.0.2</version>
 
     <properties>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.21</kotlin.version>
     </properties>
 
 
@@ -116,37 +116,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.luckperms</groupId>
-            <artifactId>api</artifactId>
-            <version>5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>JoinChecker</artifactId>
-            <version>1.5.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
             <version>${kotlin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>sequelize4j</artifactId>
-            <version>0.3.9</version>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>SimplePacketListenerAPI</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

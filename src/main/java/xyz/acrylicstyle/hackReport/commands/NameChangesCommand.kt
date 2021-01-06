@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitRunnable
 import util.CollectionList
 import xyz.acrylicstyle.hackReport.HackReport.Companion.instance
-import xyz.acrylicstyle.joinChecker.utils.Utils
 import xyz.acrylicstyle.shared.BaseMojangAPI
 import xyz.acrylicstyle.shared.NameHistory
 import java.util.Calendar
@@ -17,7 +16,6 @@ class NameChangesCommand : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         object : BukkitRunnable() {
             override fun run() {
-                if (Utils.modCheck(sender)) return
                 val uuid = BaseMojangAPI.getUniqueId(args[0])
                 if (uuid == null) {
                     sender.sendMessage(ChatColor.RED.toString() + "プレイヤーが見つかりません。")

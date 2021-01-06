@@ -5,58 +5,15 @@ softdepend:
   - LuckPerms
 depend:
   - TomeitoLib
-  - JoinChecker
 commands:
-  report:
-    description: "Report a player."
-  reports:
-    description: "Shows reports list."
-    aliases: ["reportlist"]
-    permission: hackreport.reports
-  player:
-    description: "Opens player action GUI."
-    aliases: ["playeraction"]
-    permission: hackreport.player
-  hackreport:
-    description: "HackReport root command."
-    aliases: "hr"
   ignore:
     description: "Ignore specific player's chat"
-  mute:
-    description: "Mute a player."
-  amute:
-    description: "Mute a player, but anonymously."
-    aliases: ["muteanonymous", "anonymousmute"]
   opchat:
     aliases: "oc"
     permission: hackreport.opchat
-  modchat:
-    aliases: "mc"
   commandlog:
     aliases: ["clog", "cl"]
     permission: hackreport.commandlog
-  muteall:
-    description: "Mutes all server chats. (excludes /tell)"
-    permission: hackreport.muteall
   namechanges:
     description: "shows name changes"
-  warn:
-    description: "warns player"
-  playerchecker:
-    description: "Gives player a player checker item"
-  mutelist:
-    description: "lists the players who was muted"
-  "/vanish":
-    permission: hackreport.vanish
-  lookupmute:
-    description: ""
-  mutetell:
-    aliases: ['mutell']
-  watch:
-    description: "Watches player"
-  unwatch:
-    description: "Unwatches player"
-permissions:
-  hackreport.report:
-    description: "allows /report"
-    default: true
+    permission: hackreport.namechanges

@@ -9,7 +9,7 @@ import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
 
 class OpChatCommand : PlayerCommandExecutor() {
     override fun onCommand(player: Player, args: Array<String>) {
-        if (args.size != 0) {
+        if (args.isNotEmpty()) {
             Do(player.name, ICollectionList.asList(args).join(" "))
             return
         }

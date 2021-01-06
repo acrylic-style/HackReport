@@ -18,7 +18,7 @@ class IgnoreCommand : PlayerCommandExecutor() {
     override fun onCommand(player: Player, args: Array<String>) {
         object : BukkitRunnable() {
             override fun run() {
-                if (args.size == 0) {
+                if (args.isEmpty()) {
                     player.sendMessage("${ChatColor.YELLOW} - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
                     player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
                     player.sendMessage("${ChatColor.YELLOW} - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。")
