@@ -15,44 +15,44 @@ import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor
 import java.util.HashMap
 import java.util.UUID
 
-class IgnoreCommand : PlayerCommandExecutor() {
+class IgnoreIPCommand : PlayerCommandExecutor() {
     override fun onCommand(player: Player, args: Array<String>) {
         object : BukkitRunnable() {
             override fun run() {
                 if (args.isEmpty()) {
-                    player.sendMessage("${ChatColor.YELLOW} - /ignore [add] <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
-                    player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
-                    player.sendMessage("${ChatColor.YELLOW} - /ignore list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストを表示します。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignoreip [add] <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "IPIgnoreリストに追加して、指定したプレイヤーのIPから送信されたチャットを非表示にします。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignoreip remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "IPIgnoreリストからプレイヤーを削除します。")
+                    player.sendMessage("${ChatColor.YELLOW} - /ignoreip list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "IPIgnoreリストを表示します。")
                     return
                 }
                 if (args[0].equals("add", ignoreCase = true)) {
                     if (args.size == 1) {
-                        player.sendMessage("${ChatColor.YELLOW} - /ignore add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに追加して、指定したプレイヤーのチャットを非表示にします。")
+                        player.sendMessage("${ChatColor.YELLOW} - /ignoreip add <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "IPIgnoreリストに追加して、指定したプレイヤーのIPから送信されたチャットを非表示にします。")
                         return
                     }
                     val uuid = getUniqueId(args[1], player) ?: return
                     val collection = loadIgnoreListPlayer(player.uniqueId).clone()
                     collection.add(uuid.toString(), args[1])
                     saveIgnoreListPlayer(player.uniqueId, collection)
-                    player.sendMessage("${ChatColor.GREEN}Ignoreリストに" + args[1] + "を追加しました。")
+                    player.sendMessage("${ChatColor.GREEN}IPIgnoreリストに" + args[1] + "を追加しました。")
                 } else if (args[0].equals("remove", ignoreCase = true)) {
                     if (args.size == 1) {
-                        player.sendMessage("${ChatColor.YELLOW} - /ignore remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストからプレイヤーを削除します。")
+                        player.sendMessage("${ChatColor.YELLOW} - /ignoreip remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "IPIgnoreリストからプレイヤーを削除します。")
                         return
                     }
                     val uuid = getUniqueId(args[1], player) ?: return
                     val collection = loadIgnoreListPlayer(player.uniqueId).clone()
                     val removed = collection.remove(uuid.toString())
                     if (removed == null) {
-                        player.sendMessage(ChatColor.RED.toString() + args[1] + "はIgnoreリストにいません。")
+                        player.sendMessage(ChatColor.RED.toString() + args[1] + "はIPIgnoreリストにいません。")
                         return
                     }
                     saveIgnoreListPlayer(player.uniqueId, collection)
-                    player.sendMessage("${ChatColor.GREEN}Ignoreリストから" + args[1] + "を削除しました。")
+                    player.sendMessage("${ChatColor.GREEN}IPIgnoreリストから" + args[1] + "を削除しました。")
                 } else if (args[0].equals("list", ignoreCase = true)) {
-                    player.sendMessage("${ChatColor.GREEN}Ignoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.uniqueId).valuesList().join("${ChatColor.GRAY}, ${ChatColor.YELLOW}"))
+                    player.sendMessage("${ChatColor.GREEN}IPIgnoreリスト: " + ChatColor.YELLOW + loadIgnoreListPlayer(player.uniqueId).valuesList().join("${ChatColor.GRAY}, ${ChatColor.YELLOW}"))
                 } else {
-                    TomeitoAPI.run { player.chat("/ignore add ${args[0]}") }
+                    TomeitoAPI.run { player.chat("/ignoreip add ${args[0]}") }
                 }
             }
         }.runTaskAsynchronously(instance)
@@ -60,20 +60,21 @@ class IgnoreCommand : PlayerCommandExecutor() {
 
     companion object {
         fun loadIgnoreListPlayer(uuid: UUID): StringCollection<String> {
-            val map2 = HackReport.getPlayerConfig(uuid).getConfigSectionValue("ignore", true)
+            val map2 = HackReport.getPlayerConfig(uuid).getConfigSectionValue("ignoredIPs", true)
                 ?: return StringCollection()
             return StringCollection(ICollection.asCollection(map2).mapValues { _: String?, o: Any -> o as String })
         }
 
         fun saveIgnoreListPlayer(uuid: UUID, collection: StringCollection<String>?) {
-            HackReport.getPlayerConfig(uuid).setThenSave("ignore", HashMap(collection))
+            HackReport.getPlayerConfig(uuid).setThenSave("ignoredIPs", HashMap(collection))
         }
 
         fun isPlayerIgnored(message: String, player: Player, target: Player): Boolean {
-            if (IgnoreWordCommand.loadIgnoreListPlayer(player.uniqueId).anyMatch { s -> message.contains(s) }) return true
-            if (loadIgnoreListPlayer(player.uniqueId).containsKey(target.uniqueId.toString())) return true
-            if (IgnoreIPCommand.isPlayerIgnored(message, player, target)) return true // heavy operation, i think
-            return false
+            return loadIgnoreListPlayer(player.uniqueId)
+                .keysList()
+                .map { uuid -> Bukkit.getPlayer(UUID.fromString(uuid)) }
+                .nonNull()
+                .anyMatch { p -> p.address.address.hostAddress == target.address.address.hostAddress }
         }
 
         fun getUniqueId(p: String?, player: CommandSender): UUID? {

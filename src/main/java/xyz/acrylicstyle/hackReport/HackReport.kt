@@ -8,10 +8,13 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.plugin.java.JavaPlugin
+import util.Collection
 import util.CollectionList
 import util.CollectionSet
 import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
 import xyz.acrylicstyle.hackReport.commands.IgnoreCommand
+import xyz.acrylicstyle.hackReport.commands.IgnoreIPCommand
+import xyz.acrylicstyle.hackReport.commands.IgnoreWordCommand
 import xyz.acrylicstyle.hackReport.commands.NameChangesCommand
 import xyz.acrylicstyle.hackReport.commands.OpChatCommand
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI
@@ -35,6 +38,8 @@ class HackReport : JavaPlugin(), Listener {
             preloadClass("xyz.acrylicstyle.hackReport.commands.CommandLogCommand")
             preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreCommand")
             preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreCommand$1")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreWordCommand")
+            preloadClass("xyz.acrylicstyle.hackReport.commands.IgnoreWordCommand$1")
             preloadClass("xyz.acrylicstyle.hackReport.commands.NameChangesCommand")
             preloadClass("xyz.acrylicstyle.hackReport.commands.NameChangesCommand$1")
             preloadClass("xyz.acrylicstyle.hackReport.commands.OpChatCommand")
@@ -53,6 +58,8 @@ class HackReport : JavaPlugin(), Listener {
         Log.info("Loading configuration")
         Log.info("Registering commands")
         TomeitoAPI.registerCommand("ignore", IgnoreCommand())
+        TomeitoAPI.registerCommand("ignoreword", IgnoreWordCommand())
+        TomeitoAPI.registerCommand("ignoreip", IgnoreIPCommand())
         TomeitoAPI.registerCommand("opchat", OpChatCommand())
         TomeitoAPI.registerCommand("commandlog", CommandLogCommand())
         TomeitoAPI.registerCommand("namechanges", NameChangesCommand())
@@ -73,8 +80,8 @@ class HackReport : JavaPlugin(), Listener {
             || e.message.startsWith("/message ")) {
             val p = e.message.split("\\s+".toRegex()).toTypedArray()[1]
             val player = Bukkit.getPlayer(p) ?: return
-            if (IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId)) {
-                e.player.sendMessage(ChatColor.RED.toString() + "このプレイヤーにプライベートメッセージを送信することはできません。")
+            if (IgnoreCommand.isPlayerIgnored(e.message, player, e.player)) {
+                e.player.sendMessage(ChatColor.RED.toString() + "You cannot send private message to this player.")
                 e.isCancelled = true
             }
         }
@@ -82,13 +89,14 @@ class HackReport : JavaPlugin(), Listener {
 
     @EventHandler
     fun onAsyncPlayerChat(e: AsyncPlayerChatEvent) {
+        e.player.address.address.hostAddress
         if (e.player.isOp && opChat.contains(e.player.uniqueId)) {
             e.isCancelled = true
             OpChatCommand.Do(e.player.name, e.message)
             return
         }
         if (e.player.isOp) return
-        e.recipients.removeIf { player: Player -> IgnoreCommand.isPlayerIgnored(player.uniqueId, e.player.uniqueId) }
+        e.recipients.removeIf { player: Player -> IgnoreCommand.isPlayerIgnored(e.message, player, e.player) }
     }
 
     companion object {
@@ -98,10 +106,18 @@ class HackReport : JavaPlugin(), Listener {
         val modChat = CollectionSet<UUID>()
         @JvmField
         val commandLog = CollectionList<UUID>()
-        @JvmField
-        var config: ConfigProvider? = null
         @JvmStatic
         var instance: HackReport? = null
             private set
+
+        private val cachedConfig = Collection<UUID, ConfigProvider>()
+
+        fun getPlayerConfig(uuid: UUID): ConfigProvider {
+            val cache = cachedConfig[uuid]
+            if (cache != null) return cache
+            val config = ConfigProvider.getConfig("./plugins/HackReport/players/$uuid.yml")
+            cachedConfig[uuid] = config
+            return config
+        }
     }
 }

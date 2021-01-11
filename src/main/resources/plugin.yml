@@ -8,6 +8,10 @@ depend:
 commands:
   ignore:
     description: "Ignore specific player's chat"
+  ignoreword:
+    description: "Ignore specific word"
+  ignoreip:
+    description: "Ignore specific player's chat but by ip"
   opchat:
     aliases: "oc"
     permission: hackreport.opchat
