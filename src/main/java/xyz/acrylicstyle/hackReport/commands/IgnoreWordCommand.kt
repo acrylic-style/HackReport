@@ -12,8 +12,8 @@ class IgnoreWordCommand : PlayerCommandExecutor() {
     override fun onCommand(player: Player, args: Array<String>) {
         TomeitoAPI.runAsync {
             if (args.isEmpty()) {
-                player.sendMessage("${ChatColor.YELLOW} - /ignoreword [add] <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに単語を追加して、指定した単語が含まれるチャットを非表示にします。")
-                player.sendMessage("${ChatColor.YELLOW} - /ignoreword remove <プレイヤー>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストから単語を削除します。")
+                player.sendMessage("${ChatColor.YELLOW} - /ignoreword [add] <単語>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストに単語を追加して、指定した単語が含まれるチャットを非表示にします。")
+                player.sendMessage("${ChatColor.YELLOW} - /ignoreword remove <単語>" + ChatColor.GRAY + "- " + ChatColor.AQUA + "Ignoreリストから単語を削除します。")
                 player.sendMessage("${ChatColor.YELLOW} - /ignoreword list [ページ]" + ChatColor.GRAY + "- " + ChatColor.AQUA + "単語のIgnoreリストを表示します。")
                 return@runAsync
             }
