@@ -103,8 +103,6 @@ class HackReport : JavaPlugin(), Listener {
         @JvmField
         val opChat = CollectionSet<UUID>()
         @JvmField
-        val modChat = CollectionSet<UUID>()
-        @JvmField
         val commandLog = CollectionList<UUID>()
         @JvmStatic
         var instance: HackReport? = null

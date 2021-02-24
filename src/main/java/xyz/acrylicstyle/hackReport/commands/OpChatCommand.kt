@@ -17,10 +17,6 @@ class OpChatCommand : PlayerCommandExecutor() {
             HackReport.opChat.remove(player.uniqueId)
             player.sendMessage(PREFIX + "OPChatをオフにしました。")
         } else {
-            if (HackReport.modChat.contains(player.uniqueId)) {
-                player.sendMessage(ChatColor.RED.toString() + "> OPChatとModChatは同時に使用できません。")
-                return
-            }
             HackReport.opChat.add(player.uniqueId)
             player.sendMessage(PREFIX + "OPChatをオンにしました。")
         }
