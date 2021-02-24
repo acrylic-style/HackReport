@@ -9,7 +9,7 @@
     <version>0.0.2</version>
 
     <properties>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.4.30</kotlin.version>
     </properties>
 
 
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.7.2</version>
+            <version>0.7.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

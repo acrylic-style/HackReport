@@ -32,7 +32,18 @@ class IgnoreCommand : PlayerCommandExecutor() {
                     }
                     val uuid = getUniqueId(args[1], player) ?: return
                     val collection = loadIgnoreListPlayer(player.uniqueId).clone()
+                    if (collection.size >= HackReport.CAP) {
+                        if (collection.size > HackReport.CAP) {
+                            collection.keysList().limit(HackReport.CAP).forEach { key -> collection.remove(key) }
+                            saveIgnoreListPlayer(player.uniqueId, collection)
+                        }
+                        player.sendMessage("${ChatColor.RED}Maximum ignore list size reached.")
+                        return
+                    }
                     collection.add(uuid.toString(), args[1])
+                    if (collection.size > HackReport.CAP) {
+                        collection.keysList().limit(HackReport.CAP).forEach { key -> collection.remove(key) }
+                    }
                     saveIgnoreListPlayer(player.uniqueId, collection)
                     player.sendMessage("${ChatColor.GREEN}Ignoreリストに" + args[1] + "を追加しました。")
                 } else if (args[0].equals("remove", ignoreCase = true)) {
@@ -46,6 +57,9 @@ class IgnoreCommand : PlayerCommandExecutor() {
                     if (removed == null) {
                         player.sendMessage(ChatColor.RED.toString() + args[1] + "はIgnoreリストにいません。")
                         return
+                    }
+                    if (collection.size > HackReport.CAP) {
+                        collection.keysList().limit(HackReport.CAP).forEach { key -> collection.remove(key) }
                     }
                     saveIgnoreListPlayer(player.uniqueId, collection)
                     player.sendMessage("${ChatColor.GREEN}Ignoreリストから" + args[1] + "を削除しました。")

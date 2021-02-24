@@ -105,6 +105,7 @@ class HackReport : JavaPlugin(), Listener {
         @JvmStatic
         var instance: HackReport? = null
             private set
+        const val CAP = 1000L
 
         private val cachedConfig = Collection<UUID, ConfigProvider>()
 
