@@ -13,7 +13,6 @@ import util.CollectionList
 import util.CollectionSet
 import xyz.acrylicstyle.hackReport.commands.CommandLogCommand
 import xyz.acrylicstyle.hackReport.commands.IgnoreCommand
-import xyz.acrylicstyle.hackReport.commands.IgnoreIPCommand
 import xyz.acrylicstyle.hackReport.commands.IgnoreWordCommand
 import xyz.acrylicstyle.hackReport.commands.NameChangesCommand
 import xyz.acrylicstyle.hackReport.commands.OpChatCommand
@@ -59,7 +58,6 @@ class HackReport : JavaPlugin(), Listener {
         Log.info("Registering commands")
         TomeitoAPI.registerCommand("ignore", IgnoreCommand())
         TomeitoAPI.registerCommand("ignoreword", IgnoreWordCommand())
-        TomeitoAPI.registerCommand("ignoreip", IgnoreIPCommand())
         TomeitoAPI.registerCommand("opchat", OpChatCommand())
         TomeitoAPI.registerCommand("commandlog", CommandLogCommand())
         TomeitoAPI.registerCommand("namechanges", NameChangesCommand())

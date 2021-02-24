@@ -72,7 +72,6 @@ class IgnoreCommand : PlayerCommandExecutor() {
         fun isPlayerIgnored(message: String, player: Player, target: Player): Boolean {
             if (IgnoreWordCommand.loadIgnoreListPlayer(player.uniqueId).anyMatch { s -> message.contains(s) }) return true
             if (loadIgnoreListPlayer(player.uniqueId).containsKey(target.uniqueId.toString())) return true
-            if (IgnoreIPCommand.isPlayerIgnored(message, player, target)) return true // heavy operation, i think
             return false
         }
 
